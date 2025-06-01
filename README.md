@@ -14,17 +14,17 @@ Make sure you have the following installed:
 - 📦 [npm](https://www.npmjs.com/) (comes with Node.js)
 
 
-Clone the repository📥
+Clone the repository📥  
 git clone https://github.com/Probin-15/EcoSageProject.git
 
-Navigate to the project directory📂
+Navigate to the project directory📂  
 cd EcoSageProject
 
-Install dependencies⚙️
+Install dependencies⚙️  
 command1=npm install
 
-Build the project🏗️
+Build the project🏗️  
 command2=npm run build
 
-Start the production server🚀
+Start the production server🚀  
 command3=npm run start 
