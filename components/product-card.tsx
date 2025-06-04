@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Star, Leaf } from "lucide-react";
+import { ShoppingCart, Leaf } from "lucide-react";
 import { Product } from "@/lib/products";
 import { addToCart } from "@/lib/cart";
 import { toast } from "sonner";
@@ -14,15 +14,22 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  // Format price to Indian Rupees with commas and ₹ symbol
+  const formattedPrice = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+  }).format(product.price);
+
   const handleAddToCart = () => {
     console.log("Adding product to cart:", product.name);
     addToCart(product.id, product.name, product.price, product.image);
-    
+
     // Dispatch custom event to update cart count
     window.dispatchEvent(new CustomEvent("cart-updated"));
-    
+
     toast.success(`${product.name} added to cart!`, {
-      description: `$${product.price.toFixed(2)} - 1 item`,
+      description: `${formattedPrice} - 1 item`,
     });
   };
 
@@ -95,12 +102,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
           <div className="flex items-center justify-between pt-2">
             <div className="space-y-1">
-              <p className="text-lg font-bold text-forest-600">
-                ${product.price.toFixed(2)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                by {product.brand}
-              </p>
+              <p className="text-lg font-bold text-forest-600">{formattedPrice}</p>
+              <p className="text-xs text-muted-foreground">by {product.brand}</p>
             </div>
 
             <Button
@@ -111,7 +114,7 @@ export function ProductCard({ product }: ProductCardProps) {
             >
               <ShoppingCart className="h-4 w-4 mr-1" />
               Add
-            </Button>
+            </Button> 
           </div>
         </div>
       </CardContent>

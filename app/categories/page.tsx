@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
+
+
 import { 
   Package, 
   Coffee, 
@@ -27,15 +29,21 @@ const categoryIcons = {
 
 export default function CategoriesPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  console.log("Categories page rendered, selected:", selectedCategory);
 
-  const filteredProducts = selectedCategory === "all" 
-    ? mockProducts 
-    : getProductsByCategory(selectedCategory);
+  const filteredProducts = useMemo(() => {
+    return selectedCategory === "all" ? mockProducts : getProductsByCategory(selectedCategory);
+  }, [selectedCategory]);
+
+  const categoryProductCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    categories.forEach(cat => {
+      counts[cat.id] = cat.id === "all" ? mockProducts.length : getProductsByCategory(cat.id).length;
+    });
+    return counts;
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <section className="bg-gradient-to-r from-sage-50 to-forest-50 py-12">
         <div className="container mx-auto px-4 text-center">
           <Badge className="eco-badge mb-4">
@@ -53,17 +61,12 @@ export default function CategoriesPage() {
 
       <div className="container mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-4 gap-8">
-          {/* Category Sidebar */}
           <div className="lg:col-span-1">
             <div className="space-y-4 sticky top-24">
               <h2 className="font-semibold text-lg text-forest-600 mb-4">Categories</h2>
-              
               {categories.map((category) => {
                 const IconComponent = category.id === "all" ? Leaf : categoryIcons[category.id as keyof typeof categoryIcons];
-                const productCount = category.id === "all" 
-                  ? mockProducts.length 
-                  : getProductsByCategory(category.id).length;
-
+                const productCount = categoryProductCounts[category.id] || 0;
                 return (
                   <Card 
                     key={category.id}
@@ -85,7 +88,7 @@ export default function CategoriesPage() {
                           <div>
                             <div className="font-medium">{category.name}</div>
                             <div className="text-sm text-muted-foreground">
-                              {productCount} products
+                              {productCount} product{productCount !== 1 ? "s" : ""}
                             </div>
                           </div>
                         </div>
@@ -97,7 +100,6 @@ export default function CategoriesPage() {
             </div>
           </div>
 
-          {/* Products Grid */}
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-6">
               <div>

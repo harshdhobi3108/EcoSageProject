@@ -31,16 +31,23 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
 
-  const validPromoCodes = {
-    "ECO10": 0.1,
-    "SAVE15": 0.15,
-    "GREEN20": 0.2
+  const validPromoCodes: { [code: string]: number } = {
+    ECO10: 0.1,
+    SAVE15: 0.15,
+    GREEN20: 0.2
   };
 
   const subtotal = cart.total;
   const shipping = subtotal > 50 ? 0 : 5.99;
   const discountAmount = subtotal * discount;
   const finalTotal = subtotal + shipping - discountAmount;
+
+  // Formatter for Indian Rupee currency
+  const rupeeFormatter = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+  });
 
   const updateCartState = useCallback(() => {
     const updated = getCart();
@@ -82,30 +89,40 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    const amountInPaise = Math.round(finalTotal * 100); // Razorpay requires amount in paise
+    if (cart.itemCount === 0) {
+      toast.error("Your cart is empty! Please add products before checkout.");
+      return;
+    }
+
+    const amountInPaise = Math.round(finalTotal * 100);
 
     const options = {
-      key: "rzp_test_st3aUplBX27wu6", // Replace with your Razorpay Key ID
-      amount: amountInPaise, 
+      key: "rzp_test_st3aUplBX27wu6",
+      amount: amountInPaise,
       currency: "INR",
       name: "EcoSage",
       description: "Purchase from EcoSage",
       image: "/logo.png",
       handler: function (response: any) {
         alert("Payment successful! ID: " + response.razorpay_payment_id);
-        // Optionally: send response to backend to store order
+
+        clearCart();
+        setCart(getCart());
+        window.dispatchEvent(new CustomEvent("cart-updated"));
+
+        toast.success("Thank you for your purchase! Your cart has been cleared.");
       },
       prefill: {
         name: "Harsh",
         email: "harsh@example.com",
-        contact: "9000090000",
+        contact: "9000090000"
       },
       notes: {
-        address: "EcoSage HQ",
+        address: "EcoSage HQ"
       },
       theme: {
-        color: "#5a9a68",
-      },
+        color: "#5a9a68"
+      }
     };
 
     const rzp = new (window as any).Razorpay(options);
@@ -114,7 +131,6 @@ export default function CartPage() {
 
   return (
     <>
-      {/* Razorpay Script Loader */}
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
         strategy="afterInteractive"
@@ -175,7 +191,7 @@ export default function CartPage() {
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{item.name}</h3>
                         <p className="text-2xl font-bold text-forest-600 mt-1">
-                          ${item.price.toFixed(2)}
+                          {rupeeFormatter.format(item.price)}
                         </p>
                       </div>
                       <div className="flex items-center space-x-3">
@@ -243,12 +259,12 @@ export default function CartPage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <span>Subtotal ({cart.itemCount} items)</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>{rupeeFormatter.format(subtotal)}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Discount ({(discount * 100).toFixed(0)}%)</span>
-                      <span>-${discountAmount.toFixed(2)}</span>
+                      <span>-{rupeeFormatter.format(discountAmount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
@@ -256,14 +272,18 @@ export default function CartPage() {
                       <Truck className="h-4 w-4" />
                       <span>Shipping</span>
                     </span>
-                    <span>{shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}</span>
+                    <span>{shipping === 0 ? "FREE" : rupeeFormatter.format(shipping)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>${finalTotal.toFixed(2)}</span>
+                    <span>{rupeeFormatter.format(finalTotal)}</span>
                   </div>
-                  <Button className="w-full mt-4" onClick={handleCheckout}>
+                  <Button 
+                    className="w-full mt-4" 
+                    onClick={handleCheckout} 
+                    disabled={cart.itemCount === 0}
+                  >
                     Proceed to Payment
                   </Button>
                 </CardContent>

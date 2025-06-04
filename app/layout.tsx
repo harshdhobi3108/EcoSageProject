@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Header } from '@/components/header';
 import { Toaster } from '@/components/ui/sonner';
-import { ClerkProvider} from '@clerk/nextjs';
+import { ClerkProvider } from '@clerk/nextjs';
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 
@@ -23,8 +23,8 @@ export default function RootLayout({
         <body className={`${inter.className} antialiased min-h-screen bg-background`}>
           
           {/* Authentication Header */}
-          <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-          
+          <header className="flex justify-end items-center gap-4 border-b">
+            {/* Add auth-related buttons or links here */}
           </header>
 
           {/* Main App Header */}

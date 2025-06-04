@@ -1,13 +1,10 @@
 "use client";
 
 import { ProductGrid } from "@/components/product-grid";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag, Filter, TrendingUp } from "lucide-react";
+import { ShoppingBag, TrendingUp } from "lucide-react";
 
 export default function ShopPage() {
-  console.log("Shop page rendered");
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
