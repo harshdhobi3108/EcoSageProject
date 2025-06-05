@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { Product, mockProducts, categories, searchProducts, getProductsByCategory } from "@/lib/products";
 
 export function ProductGrid() {
@@ -16,8 +16,6 @@ export function ProductGrid() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [showFilters, setShowFilters] = useState(false);
-
-  console.log("ProductGrid rendered with", filteredProducts.length, "products");
 
   useEffect(() => {
     let result = [...products];
@@ -48,7 +46,6 @@ export function ProductGrid() {
     });
 
     setFilteredProducts(result);
-    console.log("Applied filters:", { searchQuery, selectedCategory, sortBy, resultCount: result.length });
   }, [products, searchQuery, selectedCategory, sortBy]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,12 +54,10 @@ export function ProductGrid() {
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
-    console.log("Category changed to:", value);
   };
 
   const handleSortChange = (value: string) => {
     setSortBy(value);
-    console.log("Sort changed to:", value);
   };
 
   return (

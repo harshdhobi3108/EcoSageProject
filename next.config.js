@@ -8,7 +8,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  images: { unoptimized: true },
+  images: {
+    domains: ['images.unsplash.com'],
+    unoptimized: true, // 👈 Add this line
+  },
   devIndicators: false,
   allowedDevOrigins: [
     "*.macaly.dev",
