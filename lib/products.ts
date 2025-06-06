@@ -1,3 +1,4 @@
+// product.ts
 export interface Product {
   id: string;
   name: string;
@@ -29,20 +30,19 @@ export const mockProducts: Product[] = [
     certifications: ["Cradle to Cradle", "BPA-Free"]
   },
   {
-  id: "2", 
-  name: "Bamboo Fiber Lunch Box Set",
-  description: "Complete lunch set made from sustainable bamboo fiber. Includes container, utensils, and carrying bag.",
-  price: 150,
-  image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=400&h=400&q=80",
-  category: "food-storage",
-  tags: ["biodegradable", "zero-waste", "portable", "microwave-safe"],
-  ecoScore: 8,
-  inStock: true,
-  brand: "GreenEats",
-  materials: ["bamboo fiber", "corn starch"],
-  certifications: ["FDA Approved", "Biodegradable"]
-},
-
+    id: "2",
+    name: "Bamboo Fiber Lunch Box Set",
+    description: "Complete lunch set made from sustainable bamboo fiber. Includes container, utensils, and carrying bag.",
+    price: 150,
+    image: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=400&h=400&q=80",
+    category: "food-storage",
+    tags: ["biodegradable", "zero-waste", "portable", "microwave-safe"],
+    ecoScore: 8,
+    inStock: true,
+    brand: "GreenEats",
+    materials: ["bamboo fiber", "corn starch"],
+    certifications: ["FDA Approved", "Biodegradable"]
+  },
   {
     id: "3",
     name: "Organic Cotton Canvas Tote Bag",
@@ -76,7 +76,7 @@ export const mockProducts: Product[] = [
     name: "Beeswax Food Wraps Set",
     description: "Natural alternative to plastic wrap. Set of 3 wraps in different sizes made with organic beeswax.",
     price: 100,
-    image: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400&h=400&fit=crop", 
+    image: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400&h=400&fit=crop",
     category: "food-storage",
     tags: ["plastic-free", "reusable", "compostable", "natural"],
     ecoScore: 9,
@@ -155,21 +155,20 @@ export const mockProducts: Product[] = [
     materials: ["food-grade silicone"],
     certifications: ["FDA Approved", "BPA-Free"]
   },
- {
-  id: "11",
-  name: "Solar Garden String Lights",
-  description: "20ft waterproof LED string lights powered by solar energy. Perfect for outdoor entertaining.",
-  price: 300,
-  image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&h=400&q=80",
-  category: "home",
-  tags: ["solar-powered", "waterproof", "decorative", "energy-efficient"],
-  ecoScore: 8,
-  inStock: true,
-  brand: "SolarGlow",
-  materials: ["recycled copper wire", "solar panel"],
-  certifications: ["IP65 Waterproof", "Energy Star"]
-},
-
+  {
+    id: "11",
+    name: "Solar Garden String Lights",
+    description: "20ft waterproof LED string lights powered by solar energy. Perfect for outdoor entertaining.",
+    price: 300,
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&h=400&q=80",
+    category: "home",
+    tags: ["solar-powered", "waterproof", "decorative", "energy-efficient"],
+    ecoScore: 8,
+    inStock: true,
+    brand: "SolarGlow",
+    materials: ["recycled copper wire", "solar panel"],
+    certifications: ["IP65 Waterproof", "Energy Star"]
+  },
   {
     id: "12",
     name: "Organic Cotton Mesh Produce Bags",
@@ -227,20 +226,19 @@ export const mockProducts: Product[] = [
     certifications: ["Eco-Friendly", "Non-Toxic"]
   },
   {
-  id: "16",
-  name: "Stainless Steel Lunch Containers",
-  description: "Set of 3 stackable lunch containers with leak-proof lids. Perfect for meal prep and storage.",
-  price: 700,
-  image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=400&h=400&q=80",
-  category: "food-storage",
-  tags: ["stackable", "leak-proof", "meal-prep", "durable"],
-  ecoScore: 8,
-  inStock: true,
-  brand: "SteelWare",
-  materials: ["18/8 stainless steel", "silicone seals"],
-  certifications: ["BPA-Free", "Dishwasher Safe"]
-},
-
+    id: "16",
+    name: "Stainless Steel Lunch Containers",
+    description: "Set of 3 stackable lunch containers with leak-proof lids. Perfect for meal prep and storage.",
+    price: 700,
+    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=400&h=400&q=80",
+    category: "food-storage",
+    tags: ["stackable", "leak-proof", "meal-prep", "durable"],
+    ecoScore: 8,
+    inStock: true,
+    brand: "SteelWare",
+    materials: ["18/8 stainless steel", "silicone seals"],
+    certifications: ["BPA-Free", "Dishwasher Safe"]
+  },
   {
     id: "17",
     name: "Wooden Wireless Charging Pad",
@@ -282,35 +280,68 @@ export const categories = [
 ];
 
 export function getProductById(id: string): Product | undefined {
-  console.log("Getting product by ID:", id);
   return mockProducts.find(product => product.id === id);
 }
 
 export function searchProducts(query: string, products: Product[] = mockProducts): Product[] {
-  console.log("Searching products with query:", query);
-  
   if (!query.trim()) return products;
-  
+
   const searchTerms = query.toLowerCase().split(" ");
-  
+
   return products.filter(product => {
     const searchableText = `
-      ${product.name} 
-      ${product.description} 
-      ${product.category} 
+      ${product.name}
+      ${product.description}
+      ${product.category}
       ${product.brand}
-      ${product.tags.join(" ")} 
+      ${product.tags.join(" ")}
       ${product.materials.join(" ")}
       ${product.certifications.join(" ")}
     `.toLowerCase();
-    
+
     return searchTerms.some(term => searchableText.includes(term));
   });
 }
 
 export function getProductsByCategory(categoryId: string, products: Product[] = mockProducts): Product[] {
-  console.log("Filtering products by category:", categoryId);
-  
   if (categoryId === "all") return products;
   return products.filter(product => product.category === categoryId);
+}
+
+export function filterProducts(products: Product[], options: { inStock?: boolean; minEcoScore?: number } = {}): Product[] {
+  return products.filter(product => {
+    if (options.inStock !== undefined && product.inStock !== options.inStock) return false;
+    if (options.minEcoScore !== undefined && product.ecoScore < options.minEcoScore) return false;
+    return true;
+  });
+}
+
+export function sortProducts(products: Product[], sortBy: "price-asc" | "price-desc" | "ecoScore-desc" = "price-asc"): Product[] {
+  return [...products].sort((a, b) => {
+    switch (sortBy) {
+      case "price-asc": return a.price - b.price;
+      case "price-desc": return b.price - a.price;
+      case "ecoScore-desc": return b.ecoScore - a.ecoScore;
+      default: return 0;
+    }
+  });
+}
+
+export function filterAndSortProducts({
+  query = "",
+  categoryId = "all",
+  inStock,
+  minEcoScore,
+  sortBy = "price-asc"
+}: {
+  query?: string;
+  categoryId?: string;
+  inStock?: boolean;
+  minEcoScore?: number;
+  sortBy?: "price-asc" | "price-desc" | "ecoScore-desc";
+}): Product[] {
+  let results = searchProducts(query);
+  results = getProductsByCategory(categoryId, results);
+  results = filterProducts(results, { inStock, minEcoScore });
+  return sortProducts(results, sortBy);
 }

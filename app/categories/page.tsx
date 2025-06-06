@@ -1,5 +1,6 @@
 "use client";
 
+import Typewriter from "typewriter-effect";
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,9 +51,27 @@ export default function CategoriesPage() {
             <Leaf className="h-4 w-4 mr-2" />
             Product Categories
           </Badge>
-          <h1 className="text-4xl font-bold text-forest-600 mb-4">
-            Browse by Category
-          </h1>
+          <h1 className="text-4xl font-bold text-forest-600">
+  <Typewriter
+    options={{
+      loop: true,
+      delay: 50,
+      deleteSpeed: 30,
+      cursor: "",
+    }}
+    onInit={(typewriter) => {
+      return typewriter
+        .typeString("Browse by Category")
+        .pauseFor(1500)
+        .deleteAll()
+        .pauseFor(1500)
+        .start();
+    }}
+  />
+</h1>
+
+
+
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Find the perfect sustainable products organized by category. Every item is carefully selected for its environmental impact.
           </p>

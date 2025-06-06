@@ -93,7 +93,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           <div className="flex flex-wrap gap-1">
-            {product.tags.slice(0, 2).map((tag) => (
+            {product.tags?.slice(0, 2).map((tag) => (
               <Badge key={tag} variant="outline" className="text-xs">
                 {tag}
               </Badge>

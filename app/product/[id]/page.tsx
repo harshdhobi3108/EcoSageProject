@@ -31,11 +31,23 @@ export default function ProductPage() {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    if (productId) {
-      const foundProduct = getProductById(productId);
-      setProduct(foundProduct || null);
+  const fetchProduct = async () => {
+    try {
+      const res = await fetch(`/api/products/${productId}`);
+      if (!res.ok) throw new Error("Failed to fetch product");
+
+      const product = await res.json();
+      setProduct(product);
+    } catch (error) {
+      console.error("Error loading product:", error);
     }
-  }, [productId]);
+  };
+
+  if (productId) {
+    fetchProduct();
+  }
+}, [productId]);
+
 
   if (!product) {
     return (

@@ -4,6 +4,7 @@ export interface AIResponse {
   message: string;
   products: Product[];
   confidence: number;
+  suggestions?: string[];
 }
 
 // Advanced keyword mapping for better AI responses
@@ -31,15 +32,19 @@ const keywordCategories = {
   home: {
     keywords: ["home", "house", "garden", "decor", "light", "sheet", "bed", "room", "indoor", "outdoor", "kombucha"],
     response: "Here are some excellent sustainable home products that will make your living space more eco-friendly and beautiful!"
+  },
+  kitchen: {
+    keywords: ["kitchen", "cook", "cooking", "utensil", "knife", "cutting", "pan", "pot", "daily use", "daily"],
+    response: "Here are some great eco-friendly kitchen products that make daily cooking and meal prep sustainable and easy!"
   }
 };
 
 const intentPatterns = {
   travel: {
     keywords: ["travel", "trip", "vacation", "portable", "compact", "lightweight", "hiking", "camping", "outdoor"],
-    filter: (products: Product[]) => products.filter(p => 
-      p.tags.includes("travel-friendly") || 
-      p.tags.includes("portable") || 
+    filter: (products: Product[]) => products.filter(p =>
+      p.tags.includes("travel-friendly") ||
+      p.tags.includes("portable") ||
       p.tags.includes("hiking") ||
       p.category === "bags"
     ),
@@ -67,15 +72,28 @@ const intentPatterns = {
   }
 };
 
-export function processAIQuery(query: string): AIResponse {
+export async function processAIQuery(query: string): Promise<AIResponse> {
   console.log("Processing AI query:", query);
-  
-  const lowerQuery = query.toLowerCase();
+
+  const lowerQuery = query.toLowerCase().trim();
+
+  // 💡 1. Handle greetings early and return immediately
+  const greetingMessages = ["hi", "hello", "hey", "how are you", "good morning", "good evening"];
+  if (greetingMessages.includes(lowerQuery)) {
+    return {
+      message: "Hello! How can I assist you with sustainable products today?",
+      products: [],
+      confidence: 1.0,
+      suggestions: ["I need an eco-friendly lunchbox", "Show me reusable straws"],
+    };
+  }
+
+  // 💡 2. Now proceed with the usual logic
   let products: Product[] = [];
   let response = "";
-  let confidence = 0.7; // Base confidence
-
-  // First, check for specific intents
+  let confidence = 0.7;
+ 
+  // Check for specific intents
   let intentMatched = false;
   for (const [intent, config] of Object.entries(intentPatterns)) {
     if (config.keywords.some(keyword => lowerQuery.includes(keyword))) {
@@ -88,12 +106,21 @@ export function processAIQuery(query: string): AIResponse {
     }
   }
 
-  // If no intent matched, check category keywords
+  // Check category keywords
   if (!intentMatched) {
     for (const [category, config] of Object.entries(keywordCategories)) {
       if (config.keywords.some(keyword => lowerQuery.includes(keyword))) {
         console.log("Category matched:", category);
-        products = mockProducts.filter(p => p.category === category);
+        if (category === "kitchen") {
+          products = mockProducts.filter(p =>
+            p.category === "kitchen" ||
+            p.category === "food-storage" ||
+            p.category === "home" ||
+            p.tags.includes("kitchen")
+          );
+        } else {
+          products = mockProducts.filter(p => p.category === category);
+        }
         response = config.response;
         confidence = 0.8;
         break;
@@ -101,23 +128,22 @@ export function processAIQuery(query: string): AIResponse {
     }
   }
 
-  // Fallback to general search
+  // Fallback to search
   if (products.length === 0) {
     console.log("Using fallback search");
     products = searchProducts(query);
-    
+
     if (products.length > 0) {
       response = `I found ${products.length} sustainable product${products.length === 1 ? '' : 's'} that match your search. These eco-friendly options will help you make a positive environmental impact!`;
       confidence = 0.6;
     } else {
-      // Show popular products as ultimate fallback
       products = mockProducts.filter(p => p.ecoScore >= 8).slice(0, 4);
       response = "I couldn't find specific matches for your request, but here are some of our most popular eco-friendly products that customers love!";
       confidence = 0.4;
     }
   }
 
-  // Enhance response with specific product context
+  // Enhance response with extra details
   if (products.length > 0) {
     const avgEcoScore = products.reduce((sum, p) => sum + p.ecoScore, 0) / products.length;
     const priceRange = {
@@ -128,7 +154,7 @@ export function processAIQuery(query: string): AIResponse {
     if (avgEcoScore >= 8.5) {
       response += " These products have exceptional sustainability scores!";
     }
-    
+
     if (priceRange.min === priceRange.max) {
       response += ` All priced at $${priceRange.min.toFixed(2)}.`;
     } else {
@@ -136,12 +162,11 @@ export function processAIQuery(query: string): AIResponse {
     }
   }
 
-  // Sort products by eco score for best recommendations
   products = products.sort((a, b) => b.ecoScore - a.ecoScore).slice(0, 4);
 
-  console.log("AI response generated:", { 
-    response, 
-    productCount: products.length, 
+  console.log("AI response generated:", {
+    response,
+    productCount: products.length,
     confidence,
     avgEcoScore: products.length > 0 ? products.reduce((sum, p) => sum + p.ecoScore, 0) / products.length : 0
   });
@@ -153,26 +178,26 @@ export function processAIQuery(query: string): AIResponse {
   };
 }
 
-// Additional helper for conversation context
+// Helper: follow-up suggestions
 export function generateFollowUpSuggestions(lastQuery: string, products: Product[]): string[] {
   const suggestions: string[] = [];
-  
+
   if (products.length > 0) {
     const category = products[0].category;
     suggestions.push(`Show me more ${category} products`);
-    
+
     if (products.some(p => p.price < 25)) {
       suggestions.push("What are your most affordable options?");
     }
-    
+
     if (products.some(p => p.ecoScore >= 9)) {
       suggestions.push("Which products have the highest eco scores?");
     }
   }
-  
+
   suggestions.push("What's trending in sustainable products?");
   suggestions.push("I need gift ideas for someone eco-conscious");
   suggestions.push("Show me products for zero-waste living");
-  
+
   return suggestions.slice(0, 3);
 }

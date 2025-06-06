@@ -1,5 +1,6 @@
 "use client";
 
+import Typewriter from "typewriter-effect";
 import { ProductGrid } from "@/components/product-grid";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, TrendingUp } from "lucide-react";
@@ -16,8 +17,23 @@ export default function ShopPage() {
               Sustainable Shopping
             </Badge>
             <h1 className="text-4xl font-bold text-forest-600">
-              Shop Eco-Friendly Products
-            </h1>
+  <Typewriter
+    options={{
+      loop: true,
+      delay: 50,
+      deleteSpeed: 30,
+      cursor: "",
+    }}
+    onInit={(typewriter) => {
+      typewriter
+        .typeString("Shop Eco-Friendly Products")
+        .pauseFor(1500)
+        .deleteAll()
+        .start();
+    }}
+  />
+</h1>
+
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Discover our curated collection of sustainable products. Every purchase makes a positive impact on our planet.
             </p>
