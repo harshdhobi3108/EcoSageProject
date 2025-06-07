@@ -8,9 +8,30 @@ import { ClerkProvider } from '@clerk/nextjs';
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("http://localhost:3000/"),
   title: "EcoSage - AI-Powered Sustainable E-Commerce",
   description: "Discover eco-friendly products with AI-powered recommendations. Shop sustainable, live responsibly.",
+  icons: {
+    icon: "/logo.png",  
+  },
+  openGraph: {
+    title: "EcoSage - AI-Powered Sustainable E-Commerce",
+    description: "Discover eco-friendly products with AI-powered recommendations. Shop sustainable, live responsibly.",
+    url: "http://localhost:3000/",
+    siteName: "EcoSage",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "EcoSage Logo",
+      },
+    ],
+    type: "website",
+  },
 };
+
+
 
 export default function RootLayout({
   children,

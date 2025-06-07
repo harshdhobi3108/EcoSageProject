@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Send, Bot, User, Sparkles, Leaf } from "lucide-react";
-import { searchProducts, Product } from "@/lib/products";
+import { Product } from "@/lib/products";
 import { ProductCard } from "./product-card";
-import { processAIQuery, generateFollowUpSuggestions } from "@/lib/ai-service";
 
 interface Message {
   id: string;
@@ -16,7 +20,6 @@ interface Message {
   content: string;
   products?: Product[];
   timestamp: Date;
-  confidence?: number;
   suggestions?: string[];
 }
 
@@ -25,79 +28,98 @@ export function AIAssistant() {
     {
       id: "1",
       role: "assistant",
-      content: "Hi! I'm your EcoSage assistant. Tell me what you're looking for and I'll help you find the perfect sustainable product. For example, try asking: 'I need something to keep my drinks cold while traveling'",
+      content:
+        "Hi! I'm your EcoSage assistant. Tell me what you're looking for and I'll help you find the perfect sustainable product. For example, try asking: 'I need something to keep my drinks cold while traveling'",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const processUserQuery = async (query: string): Promise<{ response: string; products: Product[]; confidence: number; suggestions: string[] }> => {
-    console.log("Processing AI query:", query);
-    
-    // Use the enhanced AI service
-    const aiResponse = processAIQuery(query);
-    const suggestions = generateFollowUpSuggestions(query, aiResponse.products);
-    
-    return { 
-      response: aiResponse.message, 
-      products: aiResponse.products,
-      confidence: aiResponse.confidence,
-      suggestions
-    };
-  };
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-      timestamp: new Date(),
-    };
+  // Generate unique ID for messages
+  const uniqueId = useCallback(() => Math.random().toString(36).substring(2, 9), []);
 
-    setMessages(prev => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
+  // Send a message with given text
+  const handleSendMessageWithText = useCallback(
+    async (text: string) => {
+      if (!text.trim() || isLoading) return;
 
-    try {
-      const { response, products, confidence, suggestions } = await processUserQuery(input);
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: response,
-        products: products,
-        timestamp: new Date(),
-        confidence,
-        suggestions
-      };
+      // Add user message immediately
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: uniqueId(),
+          role: "user",
+          content: text,
+          timestamp: new Date(),
+        },
+      ]);
+      setInput("");
+      setIsLoading(true);
 
-      setMessages(prev => [...prev, assistantMessage]);
-      console.log("AI response generated:", { response, productCount: products.length, confidence });
-    } catch (error) {
-      console.error("Error processing AI query:", error);
-      
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Sorry, I'm having trouble right now. Please try asking again!",
-        timestamp: new Date(),
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      try {
+        // Call your backend API
+        const res = await fetch("/api/ai-assistant", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text }),
+        });
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+        if (!res.ok) throw new Error("API error");
+
+        const data = await res.json();
+        console.log("AI response content:", data.content); // Debug full response
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: uniqueId(),
+            role: "assistant",
+            content: data.content || "Sorry, no response.",
+            products: data.products || [],
+            suggestions: data.suggestions || [],
+            timestamp: new Date(),
+          },
+        ]);
+      } catch (error) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: uniqueId(),
+            role: "assistant",
+            content: "Sorry, I couldn't get a response right now.",
+            timestamp: new Date(),
+          },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, uniqueId]
+  );
+
+  // Handler for button click or Enter key
+  const handleSendMessage = useCallback(() => {
+    handleSendMessageWithText(input);
+  }, [input, handleSendMessageWithText]);
+
+  // Submit on Enter key (without Shift)
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    },
+    [handleSendMessage]
+  );
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -107,7 +129,10 @@ export function AIAssistant() {
             <Sparkles className="h-5 w-5" />
           </div>
           <span>EcoSage AI Assistant</span>
-          <Badge variant="secondary" className="ml-auto bg-white/20 text-white border-white/30">
+          <Badge
+            variant="secondary"
+            className="ml-auto bg-white/20 text-white border-white/30"
+          >
             <Leaf className="h-3 w-3 mr-1" />
             Powered by AI
           </Badge>
@@ -124,11 +149,13 @@ export function AIAssistant() {
                 message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
               }`}
             >
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                message.role === "assistant"
-                  ? "bg-forest-100 text-forest-600"
-                  : "bg-sandy-100 text-sandy-600"
-              }`}>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  message.role === "assistant"
+                    ? "bg-forest-100 text-forest-600"
+                    : "bg-sandy-100 text-sandy-600"
+                }`}
+              >
                 {message.role === "assistant" ? (
                   <Bot className="h-4 w-4" />
                 ) : (
@@ -136,13 +163,20 @@ export function AIAssistant() {
                 )}
               </div>
 
-              <div className={`flex-1 max-w-sm ${message.role === "user" ? "text-right" : ""}`}>
-                <div className={`chat-bubble ${
-                  message.role === "user"
-                    ? "bg-sandy-100 border-sandy-200"
-                    : "bg-white border-gray-200"
-                }`}>
-                  <p className="text-sm">{message.content}</p>
+              <div
+                className={`flex-1 max-w-sm ${
+                  message.role === "user" ? "text-right" : ""
+                }`}
+              >
+                <div
+                  className={`chat-bubble max-h-72 overflow-y-auto ${
+                    message.role === "user"
+                      ? "bg-sandy-100 border-sandy-200"
+                      : "bg-white border-gray-200"
+                  }`}
+                  style={{ whiteSpace: "pre-wrap" }}
+                >
+                  <p className="text-sm">{message.content.trim()}</p>
                 </div>
 
                 {/* Product Recommendations */}
@@ -162,7 +196,11 @@ export function AIAssistant() {
                       {message.suggestions.map((suggestion, index) => (
                         <button
                           key={index}
-                          onClick={() => setInput(suggestion)}
+                          onClick={() => {
+                            if (!isLoading) {
+                              handleSendMessageWithText(suggestion);
+                            }
+                          }}
                           className="text-xs px-3 py-1 bg-forest-50 hover:bg-forest-100 text-forest-700 rounded-full border border-forest-200 transition-colors"
                         >
                           {suggestion}
@@ -171,33 +209,32 @@ export function AIAssistant() {
                     </div>
                   </div>
                 )}
-
-                {/* Confidence Indicator */}
-                {message.confidence && message.role === "assistant" && (
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    {message.confidence >= 0.8 ? "🎯 High confidence" : 
-                     message.confidence >= 0.6 ? "✅ Good match" : 
-                     "💡 Suggested alternatives"}
-                  </div>
-                )}
               </div>
             </div>
           ))}
 
           {isLoading && (
-            <div className="flex items-start space-x-3">
+            <div key="loading" className="flex items-start space-x-3">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-forest-100 text-forest-600">
                 <Bot className="h-4 w-4" />
               </div>
               <div className="chat-bubble">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                  <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                  <div
+                    className="w-2 h-2 bg-forest-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-forest-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
                 </div>
               </div>
             </div>
           )}
+          {/* Scroll anchor */}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Input */}
@@ -205,7 +242,7 @@ export function AIAssistant() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             placeholder="Ask me about sustainable products... (e.g., 'I need a reusable water bottle for hiking')"
             className="flex-1"
             disabled={isLoading}
@@ -214,6 +251,7 @@ export function AIAssistant() {
             onClick={handleSendMessage}
             disabled={!input.trim() || isLoading}
             className="bg-forest-500 hover:bg-forest-600 text-white"
+            aria-label="Send message"
           >
             <Send className="h-4 w-4" />
           </Button>

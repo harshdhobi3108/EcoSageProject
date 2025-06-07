@@ -1,50 +1,90 @@
 "use client";
 
+import { useEffect } from "react";
+import Typewriter from "typewriter-effect";
 import { AIAssistant } from "@/components/ai-assistant";
 import { ProductGrid } from "@/components/product-grid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Leaf, Sparkles, ShoppingBag, Heart, Star, TrendingUp } from "lucide-react";
+import { Leaf, Sparkles, ShoppingBag, Heart, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
-  console.log("Home page rendered");
+  // Fix: Scroll to top on page load to prevent scroll jump
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-cream-50 via-sage-50 to-forest-50">
-        <div className="absolute inset-0 bg-organic-pattern opacity-30"></div>
+        <div
+          className="absolute inset-0 bg-organic-pattern opacity-30"
+          aria-hidden="true"
+        ></div>
+
         <div className="relative container mx-auto px-4 py-16 lg:py-24">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Hero Content */}
             <div className="space-y-8">
               <div className="space-y-4">
-                <Badge className="eco-badge text-sm">
-                  <Leaf className="h-4 w-4 mr-2" />
+                <Badge className="eco-badge text-sm" aria-label="Eco badge">
+                  <Leaf className="h-4 w-4 mr-2" aria-hidden="true" />
                   AI-Powered Sustainability
                 </Badge>
+
                 <h1 className="text-4xl lg:text-6xl font-bold text-forest-600 leading-tight">
-                  Shop Sustainable with 
-                  <span className="gradient-mesh bg-clip-text text-transparent block">
-                    AI Guidance
-                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    <span>Shop</span>
+                    <Typewriter
+                      options={{
+                        strings: ["Sustainable with"],
+                        autoStart: true,
+                        loop: true,
+                        cursor: "",
+                      }}
+                    />
+                  </div>
+                  <div className="gradient-mesh bg-clip-text text-transparent">
+                    <Typewriter
+                      options={{
+                        strings: ["AI Guidance"],
+                        autoStart: true,
+                        loop: true,
+                        cursor: "",
+                      }}
+                    />
+                  </div>
                 </h1>
+
                 <p className="text-lg text-muted-foreground max-w-md">
-                  Discover eco-friendly products tailored to your needs. Our AI assistant helps you find sustainable alternatives that match your lifestyle.
+                  Discover eco-friendly products tailored to your needs. Our AI
+                  assistant helps you find sustainable alternatives that match your
+                  lifestyle.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/ai-assistant">
-                  <Button size="lg" className="bg-forest-500 hover:bg-forest-600 text-white w-full sm:w-auto">
-                    <Sparkles className="h-5 w-5 mr-2" />
+                <Link href="/ai-assistant" passHref>
+                  <Button
+                    size="lg"
+                    className="bg-forest-500 hover:bg-forest-600 text-white w-full sm:w-auto"
+                    aria-label="Try AI Assistant"
+                  >
+                    <Sparkles className="h-5 w-5 mr-2" aria-hidden="true" />
                     Try AI Assistant
                   </Button>
                 </Link>
-                <Link href="/shop">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                    <ShoppingBag className="h-5 w-5 mr-2" />
+
+                <Link href="/shop" passHref>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                    aria-label="Browse Products"
+                  >
+                    <ShoppingBag className="h-5 w-5 mr-2" aria-hidden="true" />
                     Browse Products
                   </Button>
                 </Link>
@@ -69,32 +109,47 @@ export default function Home() {
 
             {/* AI Assistant Preview */}
             <div className="lg:pl-8">
-              <div className="bg-white rounded-2xl shadow-xl p-6 border">
+              <div
+                className="bg-white rounded-2xl shadow-xl p-6 border"
+                role="region"
+                aria-label="AI assistant preview"
+              >
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-forest-100 flex items-center justify-center">
-                      <Sparkles className="h-5 w-5 text-forest-600" />
+                      <Sparkles
+                        className="h-5 w-5 text-forest-600"
+                        aria-hidden="true"
+                      />
                     </div>
                     <div>
                       <div className="font-semibold text-forest-600">EcoSage AI</div>
-                      <div className="text-sm text-muted-foreground">Your sustainability guide</div>
+                      <div className="text-sm text-muted-foreground">
+                        Your sustainability guide
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="chat-bubble bg-gray-50 border-gray-200">
-                    <p className="text-sm">Hi! I can help you find sustainable products. What are you looking for today?</p>
+                    <p className="text-sm">
+                      Hi! I can help you find sustainable products. What are you
+                      looking for today?
+                    </p>
                   </div>
-                  
+
                   <div className="flex space-x-2">
-                    <Badge variant="outline" className="cursor-pointer hover:bg-forest-50">
-                      Water bottle
-                    </Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-forest-50">
-                      Lunch box
-                    </Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-forest-50">
-                      Travel gear
-                    </Badge>
+                    {["Water bottle", "Lunch box", "Travel gear"].map((item) => (
+                      <Badge
+                        key={item}
+                        variant="outline"
+                        className="cursor-pointer hover:bg-forest-50"
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Suggested product: ${item}`}
+                      >
+                        {item}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -111,11 +166,12 @@ export default function Home() {
               Meet Your AI Shopping Assistant
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Simply describe what you need, and our AI will recommend the perfect sustainable products for you. 
-              No more endless browsing - just smart, personalized recommendations.
+              Simply describe what you need, and our AI will recommend the perfect
+              sustainable products for you. No more endless browsing - just smart,
+              personalized recommendations.
             </p>
           </div>
-          
+
           <AIAssistant />
         </div>
       </section>
@@ -132,14 +188,14 @@ export default function Home() {
                 Discover our most popular sustainable products
               </p>
             </div>
-            
-            <Link href="/shop">
-              <Button variant="outline">
+
+            <Link href="/shop" passHref>
+              <Button variant="outline" aria-label="View all products">
                 View All Products
               </Button>
             </Link>
           </div>
-          
+
           <ProductGrid />
         </div>
       </section>
@@ -148,47 +204,57 @@ export default function Home() {
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl font-bold text-forest-600">
-              Why Choose EcoSage?
-            </h2>
+            <h2 className="text-3xl font-bold text-forest-600">Why Choose EcoSage?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              We're committed to making sustainable shopping easy, intelligent, and rewarding.
+              We're committed to making sustainable shopping easy, intelligent, and
+              rewarding.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-forest-100 rounded-2xl flex items-center justify-center">
-                <Sparkles className="h-8 w-8 text-forest-600" />
-              </div>
-              <h3 className="text-xl font-semibold">AI-Powered Recommendations</h3>
-              <p className="text-muted-foreground">
-                Our intelligent assistant understands your needs and suggests the perfect eco-friendly products.
-              </p>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-sage-100 rounded-2xl flex items-center justify-center">
-                <Heart className="h-8 w-8 text-sage-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Curated for Sustainability</h3>
-              <p className="text-muted-foreground">
-                Every product is carefully vetted for environmental impact and sustainability credentials.
-              </p>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-sandy-100 rounded-2xl flex items-center justify-center">
-                <TrendingUp className="h-8 w-8 text-sandy-600" />
-              </div>
-              <h3 className="text-xl font-semibold">Track Your Impact</h3>
-              <p className="text-muted-foreground">
-                See how your purchases contribute to a more sustainable future with our impact dashboard.
-              </p>
-            </div>
+            <FeatureCard
+              icon={<Sparkles className="h-8 w-8 text-forest-600" />}
+              title="AI-Powered Recommendations"
+              description="Our intelligent assistant understands your needs and suggests the perfect eco-friendly products."
+              bgClass="bg-forest-100"
+            />
+            <FeatureCard
+              icon={<Heart className="h-8 w-8 text-sage-600" />}
+              title="Curated for Sustainability"
+              description="Every product is carefully vetted for environmental impact and sustainability credentials."
+              bgClass="bg-sage-100"
+            />
+            <FeatureCard
+              icon={<TrendingUp className="h-8 w-8 text-sandy-600" />}
+              title="Track Your Impact"
+              description="See how your purchases contribute to a more sustainable future with our impact dashboard."
+              bgClass="bg-sandy-100"
+            />
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function FeatureCard({
+  icon,
+  title,
+  description,
+  bgClass,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  bgClass: string;
+}) {
+  return (
+    <div className="text-center space-y-4">
+      <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center ${bgClass}`}>
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold">{title}</h3>
+      <p className="text-muted-foreground">{description}</p>
     </div>
   );
 }
