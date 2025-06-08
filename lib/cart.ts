@@ -11,26 +11,30 @@ export interface CartItem {
 export interface Cart {
   items: CartItem[];
   total: number;
-  itemCount: number;
+  itemCount: number;       // number of unique products
+  totalQuantity: number;   // sum of quantities of all products
 }
 
 export function getCart(): Cart {
   if (typeof window === "undefined") {
-    return { items: [], total: 0, itemCount: 0 };
+    return { items: [], total: 0, itemCount: 0, totalQuantity: 0 };
   }
   
   try {
     const cartData = localStorage.getItem("ecosage-cart");
     if (cartData) {
       const cart = JSON.parse(cartData);
-      console.log("Retrieved cart from localStorage:", cart);
-      return cart;
+      return {
+        ...cart,
+        itemCount: cart.items.length,
+        totalQuantity: cart.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
+      };
     }
   } catch (error) {
     console.error("Error reading cart from localStorage:", error);
   }
   
-  return { items: [], total: 0, itemCount: 0 };
+  return { items: [], total: 0, itemCount: 0, totalQuantity: 0 };
 }
 
 export function saveCart(cart: Cart): void {
@@ -38,49 +42,42 @@ export function saveCart(cart: Cart): void {
   
   try {
     localStorage.setItem("ecosage-cart", JSON.stringify(cart));
-    console.log("Saved cart to localStorage:", cart);
   } catch (error) {
     console.error("Error saving cart to localStorage:", error);
   }
 }
 
 export function addToCart(productId: string, name: string, price: number, image: string): Cart {
-  console.log("Adding to cart:", { productId, name, price });
-  
   const cart = getCart();
   const existingItem = cart.items.find(item => item.productId === productId);
   
   if (existingItem) {
     existingItem.quantity += 1;
-    console.log("Updated existing item quantity:", existingItem);
   } else {
     cart.items.push({ productId, name, price, image, quantity: 1 });
-    console.log("Added new item to cart");
   }
   
   cart.total = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  cart.itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  cart.itemCount = cart.items.length; // unique products count
+  cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0); // total quantity
   
   saveCart(cart);
   return cart;
 }
 
 export function removeFromCart(productId: string): Cart {
-  console.log("Removing from cart:", productId);
-  
   const cart = getCart();
   cart.items = cart.items.filter(item => item.productId !== productId);
   
   cart.total = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  cart.itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  cart.itemCount = cart.items.length;
+  cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
   
   saveCart(cart);
   return cart;
 }
 
 export function updateQuantity(productId: string, quantity: number): Cart {
-  console.log("Updating quantity:", { productId, quantity });
-  
   const cart = getCart();
   const item = cart.items.find(item => item.productId === productId);
   
@@ -90,7 +87,8 @@ export function updateQuantity(productId: string, quantity: number): Cart {
     } else {
       item.quantity = quantity;
       cart.total = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      cart.itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+      cart.itemCount = cart.items.length;
+      cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
       saveCart(cart);
     }
   }
@@ -99,9 +97,7 @@ export function updateQuantity(productId: string, quantity: number): Cart {
 }
 
 export function clearCart(): Cart {
-  console.log("Clearing cart");
-  
-  const emptyCart = { items: [], total: 0, itemCount: 0 };
+  const emptyCart = { items: [], total: 0, itemCount: 0, totalQuantity: 0 };
   saveCart(emptyCart);
   return emptyCart;
 }

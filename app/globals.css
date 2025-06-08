@@ -44,6 +44,7 @@
     --chart-5: 86 40% 25%;
     --radius: 0.75rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -85,7 +86,7 @@
   .chat-bubble {
     @apply relative bg-white p-4 rounded-2xl rounded-bl-md shadow-lg;
   }
-  
+
   .chat-bubble::before {
     content: '';
     @apply absolute -bottom-2 left-3 w-0 h-0;
@@ -93,15 +94,29 @@
     border-right: 8px solid transparent;
     border-top: 8px solid white;
   }
-  
+
   .eco-badge {
     @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-forest-100 text-forest-700;
   }
-  
+
   .product-card {
-    @apply bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100;
-  }
-  
+  @apply max-w-[280px] min-h-[400px] flex flex-col rounded-lg shadow-md border border-gray-200 overflow-hidden;
+}
+
+
+.product-card:hover {
+  @apply shadow-lg;
+}
+
+.product-image-container {
+  @apply w-full h-48 flex justify-center items-center bg-gray-100 overflow-hidden rounded-t-lg;
+}
+
+.product-image {
+  @apply max-w-full max-h-full object-contain;
+}
+
+
   .gradient-mesh {
     background: linear-gradient(135deg, #8FBC8F 0%, #F4A460 50%, #2D5016 100%);
     background-size: 400% 400%;
@@ -110,14 +125,24 @@
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes bounce-subtle {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-2px); }
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 .animate-bounce-subtle {
@@ -128,4 +153,3 @@
 body > nextjs-portal {
   display: none;
 }
-  

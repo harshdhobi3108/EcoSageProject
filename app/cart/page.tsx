@@ -42,6 +42,9 @@ export default function CartPage() {
   const discountAmount = subtotal * discount;
   const finalTotal = subtotal + shipping - discountAmount;
 
+  // Calculate total quantity (sum of all item quantities)
+  const totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
+
   // Formatter for Indian Rupee currency
   const rupeeFormatter = new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -89,7 +92,7 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    if (cart.itemCount === 0) {
+    if (totalQuantity === 0) {
       toast.error("Your cart is empty! Please add products before checkout.");
       return;
     }
@@ -168,7 +171,7 @@ export default function CartPage() {
                 <div>
                   <h1 className="text-3xl font-bold text-forest-600">Shopping Cart</h1>
                   <p className="text-muted-foreground">
-                    {cart.itemCount} item{cart.itemCount !== 1 ? "s" : ""} in your cart
+                    {totalQuantity} item{totalQuantity !== 1 ? "s" : ""} in your cart
                   </p>
                 </div>
               </div>
@@ -258,7 +261,7 @@ export default function CartPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
-                    <span>Subtotal ({cart.itemCount} items)</span>
+                    <span>Subtotal ({totalQuantity} items)</span>
                     <span>{rupeeFormatter.format(subtotal)}</span>
                   </div>
                   {discount > 0 && (
@@ -282,7 +285,7 @@ export default function CartPage() {
                   <Button 
                     className="w-full mt-4" 
                     onClick={handleCheckout} 
-                    disabled={cart.itemCount === 0}
+                    disabled={totalQuantity === 0}
                   >
                     Proceed to Payment
                   </Button>
