@@ -1,16 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "target": "esnext",                           // Updated for better modern JS support
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,         // ✅ Needed for default mongoose import
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -19,9 +16,7 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "*"
-      ]
+      "@/*": ["./*"]                              // ✅ Ensure root alias works correctly
     },
     "plugins": [
       {
@@ -35,7 +30,5 @@
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

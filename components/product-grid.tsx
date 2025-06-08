@@ -1,36 +1,66 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ProductCard } from "./product-card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { Product, mockProducts, categories, searchProducts, getProductsByCategory } from "@/lib/products";
 
-export function ProductGrid() {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  ecoScore: number;
+  image: string;
+  inStock: boolean;
+  brand: string;
+  tags?: string[];
+}
+
+interface ProductGridProps {
+  products: Product[];
+  loading: boolean;
+}
+
+export function ProductGrid({ products, loading }: ProductGridProps) {
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("name");
-  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
+    if (!products || !Array.isArray(products)) {
+      setFilteredProducts([]);
+      return;
+    }
+
     let result = [...products];
 
-    // Apply category filter
+    // Filter by category
     if (selectedCategory !== "all") {
-      result = getProductsByCategory(selectedCategory, result);
+      result = result.filter((p) => p.category === selectedCategory);
     }
 
-    // Apply search filter
+    // Search filter
     if (searchQuery.trim()) {
-      result = searchProducts(searchQuery, result);
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.name.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query)
+      );
     }
 
-    // Apply sorting
+    // Sort products
     result.sort((a, b) => {
       switch (sortBy) {
         case "price-low":
@@ -60,72 +90,62 @@ export function ProductGrid() {
     setSortBy(value);
   };
 
+  const categories = [
+    { id: "all", name: "All" },
+    { id: "fruits", name: "Fruits" },
+    { id: "vegetables", name: "Vegetables" },
+    { id: "beverages", name: "Beverages" },
+  ];
+
+  if (loading) {
+    return <div className="text-center py-12 text-muted-foreground">Loading products...</div>;
+  }
+
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return <div className="text-center py-12">No products available.</div>;
+  }
+
   return (
     <div className="space-y-6">
-      {/* Search and Filters Header */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search sustainable products..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="pl-10"
-            />
-          </div>
-
-          {/* Mobile Filter Toggle */}
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className="sm:hidden"
-          >
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
-            Filters
-          </Button>
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex w-full md:max-w-sm items-center space-x-2">
+          <Input
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+          <Search className="text-muted-foreground" />
         </div>
-
-        {/* Filters Row */}
-        <div className={`flex flex-col sm:flex-row gap-4 ${showFilters ? "block" : "hidden sm:flex"}`}>
-          {/* Category Filter */}
-          <Select value={selectedCategory} onValueChange={handleCategoryChange}>
-            <SelectTrigger className="w-full sm:w-48">
+        <div className="flex items-center gap-2">
+          <Select onValueChange={handleCategoryChange} defaultValue="all">
+            <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-
-          {/* Sort Filter */}
-          <Select value={sortBy} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Sort by" />
+          <Select onValueChange={handleSortChange} defaultValue="name">
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Sort By" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="name">Name A-Z</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
               <SelectItem value="price-low">Price: Low to High</SelectItem>
               <SelectItem value="price-high">Price: High to Low</SelectItem>
               <SelectItem value="eco-score">Eco Score</SelectItem>
             </SelectContent>
           </Select>
-
-          {/* Results Count */}
-          <div className="flex items-center">
-            <Badge variant="outline" className="whitespace-nowrap">
-              {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
-            </Badge>
-          </div>
+          <SlidersHorizontal className="text-muted-foreground" />
         </div>
       </div>
 
-      {/* Products Grid */}
+      {/* Product List */}
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
@@ -140,7 +160,7 @@ export function ProductGrid() {
             </div>
             <h3 className="text-lg font-semibold">No products found</h3>
             <p className="text-muted-foreground">
-              Try adjusting your search terms or filters to find what you're looking for.
+              Try adjusting your search terms or filters.
             </p>
             <Button
               variant="outline"
@@ -149,7 +169,7 @@ export function ProductGrid() {
                 setSelectedCategory("all");
                 setSortBy("name");
               }}
-            >
+            >   
               Clear Filters
             </Button>
           </div>
