@@ -29,29 +29,31 @@ export function AIAssistant() {
       id: "1",
       role: "assistant",
       content:
-        "Hi! I'm your EcoSage assistant. Tell me what you're looking for and I'll help you find the perfect sustainable product. For example, try asking: 'I need something to keep my drinks cold while traveling'",
+        "Hi! I'm your EcoSage assistant. Tell me what you're looking for and I'll help you find the perfect sustainable product.",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Generate unique ID for messages
   const uniqueId = useCallback(() => Math.random().toString(36).substring(2, 9), []);
 
-  // Send a message with given text
+  const scrollToBottom = () => {
+    containerRef.current?.scrollTo({
+      top: containerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const handleSendMessageWithText = useCallback(
     async (text: string) => {
       if (!text.trim() || isLoading) return;
 
-      // Add user message immediately
       setMessages((prev) => [
         ...prev,
         {
@@ -65,18 +67,13 @@ export function AIAssistant() {
       setIsLoading(true);
 
       try {
-        // Call your backend API
         const res = await fetch("/api/ai-assistant", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text }),
         });
 
-        if (!res.ok) throw new Error("API error");
-
         const data = await res.json();
-        console.log("AI response content:", data.content); // Debug full response
-
         setMessages((prev) => [
           ...prev,
           {
@@ -88,7 +85,7 @@ export function AIAssistant() {
             timestamp: new Date(),
           },
         ]);
-      } catch (error) {
+      } catch {
         setMessages((prev) => [
           ...prev,
           {
@@ -105,12 +102,10 @@ export function AIAssistant() {
     [isLoading, uniqueId]
   );
 
-  // Handler for button click or Enter key
   const handleSendMessage = useCallback(() => {
     handleSendMessageWithText(input);
   }, [input, handleSendMessageWithText]);
 
-  // Submit on Enter key (without Shift)
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -140,8 +135,10 @@ export function AIAssistant() {
       </CardHeader>
 
       <CardContent className="p-6">
-        {/* Messages */}
-        <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+        <div
+          ref={containerRef}
+          className="chat-messages-container space-y-4 mb-6"
+        >
           {messages.map((message) => (
             <div
               key={message.id}
@@ -156,18 +153,10 @@ export function AIAssistant() {
                     : "bg-sandy-100 text-sandy-600"
                 }`}
               >
-                {message.role === "assistant" ? (
-                  <Bot className="h-4 w-4" />
-                ) : (
-                  <User className="h-4 w-4" />
-                )}
+                {message.role === "assistant" ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
               </div>
 
-              <div
-                className={`flex-1 max-w-sm ${
-                  message.role === "user" ? "text-right" : ""
-                }`}
-              >
+              <div className={`flex-1 max-w-sm ${message.role === "user" ? "text-right" : ""}`}>
                 <div
                   className={`chat-bubble max-h-72 overflow-y-auto ${
                     message.role === "user"
@@ -179,7 +168,6 @@ export function AIAssistant() {
                   <p className="text-sm">{message.content.trim()}</p>
                 </div>
 
-                {/* Product Recommendations */}
                 {message.products && message.products.length > 0 && (
                   <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {message.products.map((product) => (
@@ -188,7 +176,6 @@ export function AIAssistant() {
                   </div>
                 )}
 
-                {/* Follow-up Suggestions */}
                 {message.suggestions && message.suggestions.length > 0 && (
                   <div className="mt-4 space-y-2">
                     <div className="text-xs text-muted-foreground">You might also ask:</div>
@@ -196,11 +183,7 @@ export function AIAssistant() {
                       {message.suggestions.map((suggestion, index) => (
                         <button
                           key={index}
-                          onClick={() => {
-                            if (!isLoading) {
-                              handleSendMessageWithText(suggestion);
-                            }
-                          }}
+                          onClick={() => !isLoading && handleSendMessageWithText(suggestion)}
                           className="text-xs px-3 py-1 bg-forest-50 hover:bg-forest-100 text-forest-700 rounded-full border border-forest-200 transition-colors"
                         >
                           {suggestion}
@@ -221,29 +204,20 @@ export function AIAssistant() {
               <div className="chat-bubble">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-forest-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-forest-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
+                  <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce delay-100"></div>
+                  <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce delay-200"></div>
                 </div>
               </div>
             </div>
           )}
-          {/* Scroll anchor */}
-          <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <div className="flex space-x-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask me about sustainable products... (e.g., 'I need a reusable water bottle for hiking')"
+            placeholder="Ask me about sustainable products..."
             className="flex-1"
             disabled={isLoading}
           />

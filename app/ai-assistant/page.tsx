@@ -1,7 +1,7 @@
 "use client";
 
 import Typewriter from "typewriter-effect";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AIAssistant } from "@/components/ai-assistant";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,10 +17,6 @@ import {
 
 export default function AIAssistantPage() {
   const [selectedQuery, setSelectedQuery] = useState<string>("");
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
 
   const sampleQueries = [
     {
@@ -96,8 +92,7 @@ export default function AIAssistantPage() {
               {
                 icon: Heart,
                 title: "Personalized Results",
-                description:
-                  "Recommendations match your lifestyle and values",
+                description: "Recommendations match your lifestyle and values",
               },
             ].map((feature, i) => (
               <Card
