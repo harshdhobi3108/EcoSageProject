@@ -23,7 +23,6 @@ export async function POST(req: Request) {
 
     const msgLower = message.trim().toLowerCase();
 
-    // Gratitude handling
     if (gratitudePhrases.some((phrase) => msgLower.includes(phrase))) {
       return NextResponse.json({
         content: "You’re very welcome! 😊 If you need help finding more eco-friendly products, just ask.",
@@ -33,7 +32,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Greetings
     if (greetings.includes(msgLower)) {
       return NextResponse.json({
         content: "Hello! How can I help you find eco-friendly products today?",
@@ -43,7 +41,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Farewells
     if (farewells.includes(msgLower)) {
       return NextResponse.json({
         content: "Goodbye! Feel free to ask anytime about eco-friendly products.",
@@ -57,7 +54,6 @@ export async function POST(req: Request) {
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // Classify user intent
     const classificationPrompt = `
 You are a smart assistant. Classify the user's intent into one of two categories:
 - If the user asks for product recommendations or shopping, respond with "PRODUCT".
@@ -79,29 +75,24 @@ User message: "${message}"
       });
     }
 
-    // Extract keywords, ignoring trivial words
     const trivialWords = ["want", "need", "show", "find", "give", "eco"];
     let extractedKeywords = msgLower
       .split(/\s+/)
       .filter((word) => word.length > 2 && !trivialWords.includes(word));
 
-    // Detect if query has "eco" keyword
     const hasEcoKeyword = msgLower.includes("eco");
 
-    // Prepare base search condition using text search
     let searchQuery: any = {
       $text: { $search: extractedKeywords.join(" ") || msgLower },
     };
 
-    // If "eco" keyword present, add eco-friendly filter
     if (hasEcoKeyword) {
-      // Use ecoScore threshold or tags to filter eco-friendly products
       searchQuery = {
         $and: [
           searchQuery,
           {
             $or: [
-              { ecoScore: { $gte: 7 } }, // example threshold for eco-friendliness
+              { ecoScore: { $gte: 7 } },
               { tags: { $in: ["eco", "eco-friendly", "sustainable"] } },
               { category: { $regex: /eco/i } },
             ],
@@ -110,14 +101,11 @@ User message: "${message}"
       };
     }
 
-    // Query with text score sorting
     let matchedProducts = await Product.find(searchQuery, { score: { $meta: "textScore" } })
       .sort({ score: { $meta: "textScore" } })
       .limit(10);
 
-    // Fallback regex search if no products found
     if (matchedProducts.length === 0) {
-      // Regex terms from keywords
       const regexTerms = extractedKeywords.map((k) => new RegExp(k, "i"));
 
       let fallbackQuery: any = {
@@ -147,24 +135,36 @@ User message: "${message}"
       matchedProducts = await Product.find(fallbackQuery).limit(10);
     }
 
-    // Friendly fallback message when no matches found
-    // Friendly fallback message when no matches found
-if (matchedProducts.length === 0) {
-  return NextResponse.json({
-    content: `Oops! 🌿 We couldn’t find any eco-friendly products for "${message}". But don’t worry — our catalog is growing every day! 💚`,
-    products: [],
-    suggestions: [
-      "Try 'eco bag', 'reusable bottle', or 'bamboo toothbrush'.",
-      "Explore our categories: reusable bags, eco bottles, organic soaps.",
-    ],
-    confidence: 0.5,
-  });
-}
+    if (matchedProducts.length === 0) {
+      return NextResponse.json({
+        content: `Oops! 🌿 We couldn’t find any eco-friendly products for "${message}". But don’t worry — our catalog is growing every day! 💚`,
+        products: [],
+        suggestions: [
+          "Try 'eco bag', 'reusable bottle', or 'bamboo toothbrush'.",
+          "Explore our categories: reusable bags, eco bottles, organic soaps.",
+        ],
+        confidence: 0.5,
+      });
+    }
+
+    // ✅ Fix: Add `id` explicitly and avoid sending `_id`
+    const safeProducts = matchedProducts.map((p) => ({
+  id: p._id.toString(),
+  name: p.name,
+  description: p.description,
+  image: p.image,
+  price: p.price,
+  category: p.category,
+  ecoScore: p.ecoScore,
+  tags: p.tags,
+  brand: p.brand || "",
+  inStock: p.inStock ?? true,
+}));
 
 
     return NextResponse.json({
       content: "Here are some eco-friendly products based on your query:",
-      products: matchedProducts,
+      products: safeProducts,
       suggestions: [],
       confidence: 0.95,
     });

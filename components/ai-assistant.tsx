@@ -37,7 +37,10 @@ export function AIAssistant() {
   const [isLoading, setIsLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const uniqueId = useCallback(() => Math.random().toString(36).substring(2, 9), []);
+  const uniqueId = useCallback(
+    () => Math.random().toString(36).substring(2, 9),
+    []
+  );
 
   const scrollToBottom = () => {
     containerRef.current?.scrollTo({
@@ -74,6 +77,7 @@ export function AIAssistant() {
         });
 
         const data = await res.json();
+
         setMessages((prev) => [
           ...prev,
           {
@@ -137,13 +141,15 @@ export function AIAssistant() {
       <CardContent className="p-6">
         <div
           ref={containerRef}
-          className="chat-messages-container space-y-4 mb-6"
+          className="chat-messages-container space-y-4 mb-6 max-h-[60vh] overflow-y-auto"
         >
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex items-start space-x-3 ${
-                message.role === "user" ? "flex-row-reverse space-x-reverse" : ""
+                message.role === "user"
+                  ? "flex-row-reverse space-x-reverse"
+                  : ""
               }`}
             >
               <div
@@ -153,10 +159,18 @@ export function AIAssistant() {
                     : "bg-sandy-100 text-sandy-600"
                 }`}
               >
-                {message.role === "assistant" ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                {message.role === "assistant" ? (
+                  <Bot className="h-4 w-4" />
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
               </div>
 
-              <div className={`flex-1 max-w-sm ${message.role === "user" ? "text-right" : ""}`}>
+              <div
+                className={`flex-1 max-w-sm ${
+                  message.role === "user" ? "text-right" : ""
+                }`}
+              >
                 <div
                   className={`chat-bubble max-h-72 overflow-y-auto ${
                     message.role === "user"
@@ -178,12 +192,16 @@ export function AIAssistant() {
 
                 {message.suggestions && message.suggestions.length > 0 && (
                   <div className="mt-4 space-y-2">
-                    <div className="text-xs text-muted-foreground">You might also ask:</div>
+                    <div className="text-xs text-muted-foreground">
+                      You might also ask:
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {message.suggestions.map((suggestion, index) => (
                         <button
                           key={index}
-                          onClick={() => !isLoading && handleSendMessageWithText(suggestion)}
+                          onClick={() =>
+                            !isLoading && handleSendMessageWithText(suggestion)
+                          }
                           className="text-xs px-3 py-1 bg-forest-50 hover:bg-forest-100 text-forest-700 rounded-full border border-forest-200 transition-colors"
                         >
                           {suggestion}

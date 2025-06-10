@@ -26,6 +26,14 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  if (!product?.id) {
+    return (
+      <Card className="p-4 text-sm text-red-500 border border-red-300">
+        Product ID missing. Please check your API response or data mapping.
+      </Card>
+    );
+  }
+
   const formattedPrice = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -35,7 +43,6 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = () => {
     addToCart(product.id, product.name, product.price, product.image);
     window.dispatchEvent(new CustomEvent("cart-updated"));
-
     toast.success(`${product.name} added to cart!`, {
       description: `${formattedPrice} - 1 item`,
     });
@@ -53,6 +60,7 @@ export function ProductCard({ product }: ProductCardProps) {
             ? "fill-green-600 text-green-600"
             : "text-gray-300"
         }`}
+        aria-hidden="true"
       />
     ));
   };
@@ -63,8 +71,10 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="relative aspect-[4/3] w-full overflow-hidden">
           <img
             src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+            alt={product.name || "Product Image"}
+            className={`w-full h-full object-cover transition-transform duration-200 group-hover:scale-105 ${
+              !product.inStock ? "opacity-50" : ""
+            }`}
           />
           <div className="absolute top-2 right-2 z-10">
             <Badge variant="secondary" className="text-xs flex items-center gap-1">
@@ -73,8 +83,10 @@ export function ProductCard({ product }: ProductCardProps) {
             </Badge>
           </div>
           {!product.inStock && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
-              <Badge variant="destructive">Out of Stock</Badge>
+            <div className="absolute inset-0 z-20 bg-black/60 flex items-center justify-center">
+              <span className="text-white text-sm font-semibold bg-red-600 px-3 py-1 rounded-full shadow">
+                Out of Stock
+              </span>
             </div>
           )}
         </div>
@@ -95,13 +107,15 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className="text-xs text-gray-500 ml-1">Eco Score</span>
         </div>
 
-        <div className="flex flex-wrap gap-1">
-          {product.tags?.slice(0, 2).map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs capitalize">
-              {tag}
-            </Badge>
-          ))}
-        </div>
+        {product.tags && product.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {product.tags.slice(0, 2).map((tag) => (
+              <Badge key={tag} variant="outline" className="text-xs capitalize">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         <div className="mt-auto flex items-center justify-between pt-2">
           <div>
