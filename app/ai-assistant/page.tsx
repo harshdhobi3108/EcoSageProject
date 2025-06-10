@@ -2,7 +2,7 @@
 
 import Typewriter from "typewriter-effect";
 import { useState, useEffect } from "react";
-import { AIAssistant } from "@/components/ai-assistant";
+import { AIAssistant as AIAssistantComponent } from "@/components/ai-assistant";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +15,11 @@ import {
   Heart,
 } from "lucide-react";
 
-export default function AIAssistantPage() {
+interface AIAssistantProps {
+  prefillMessage?: string;
+}
+
+export function AIAssistant({ prefillMessage }: AIAssistantProps) {
   const [selectedQuery, setSelectedQuery] = useState<string>("");
 
   useEffect(() => {
@@ -124,7 +128,7 @@ export default function AIAssistantPage() {
       {/* AI Assistant Interface */}
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4">
-          <AIAssistant prefillMessage={selectedQuery} />
+          <AIAssistantComponent />
         </div>
       </section>
 
