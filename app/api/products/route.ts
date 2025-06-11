@@ -2,17 +2,35 @@ import { connectToDatabase } from "@/lib/db";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    // Connect to the database
     await connectToDatabase();
 
-    // Fetch all products from MongoDB
+    // Get search query from URL
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get("q")?.toLowerCase() || "";
+
+    // Fetch and filter products
     const products = await Product.find();
 
-    // Convert each product’s _id to id for frontend compatibility
-    const formattedProducts = products.map((product) => ({
-      id: product._id.toString(), // Important for routing and display
+    // Filter only matching products by name, description, brand, or tags
+    const filteredProducts = products.filter((product) => {
+      const name = product.name?.toLowerCase() || "";
+      const desc = product.description?.toLowerCase() || "";
+      const brand = product.brand?.toLowerCase() || "";
+      const tags = (product.tags || []).map((t) => t.toLowerCase()).join(" ");
+
+      return (
+        name.includes(q) ||
+        desc.includes(q) ||
+        brand.includes(q) ||
+        tags.includes(q)
+      );
+    });
+
+    // Convert for frontend
+    const formattedProducts = filteredProducts.map((product) => ({
+      id: product._id.toString(),
       name: product.name,
       description: product.description,
       price: product.price,
@@ -24,7 +42,6 @@ export async function GET() {
       tags: product.tags ?? [],
     }));
 
-    // Return the formatted product list
     return NextResponse.json(formattedProducts);
   } catch (error) {
     console.error("Fetch Error:", error);

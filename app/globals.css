@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -72,13 +79,19 @@
     --chart-5: 340 75% 55%;
   }
 
+  /* Remove default spacing on html & body */
+  html,
+  body {
+    @apply m-0 p-0;
+  }
+
   * {
     @apply border-border;
   }
 
   body {
-  @apply bg-background text-foreground font-inter;
-}
+    @apply bg-background text-foreground font-inter;
+  }
 }
 
 @layer components {
@@ -120,7 +133,6 @@
     animation: gradientShift 15s ease infinite;
   }
 
-  /* 🔄 Chat container internal scroll */
   .chat-messages-container {
     max-height: 24rem;
     overflow-y: auto;
@@ -169,7 +181,7 @@
   animation: bounce-subtle 2s ease-in-out infinite;
 }
 
-/* Hide Next.js dev overlay (optional) */
+/* Optional: Hide Next.js dev overlay */
 body > nextjs-portal {
   display: none;
 }
