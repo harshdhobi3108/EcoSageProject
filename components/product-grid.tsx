@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ProductCard } from "./product-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  Coffee,
+  Package,
+  ShoppingBag,
+  Smartphone,
+  Heart,
+  Home,
+  Shirt,
+  Dumbbell,
+  Utensils,
+  Gem,
+} from "lucide-react";
 
 interface Product {
   id: string;
@@ -43,15 +56,13 @@ export function ProductGrid({ products, loading }: ProductGridProps) {
       return;
     }
 
-    let result = [...products];
+    let result: Product[] = [...products];
 
-    // Filter by category
     if (selectedCategory !== "all") {
       result = result.filter((p) => p.category === selectedCategory);
     }
 
-    // Search filter
-    if (searchQuery.trim()) {
+    if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       result = result.filter(
         (p) =>
@@ -60,7 +71,6 @@ export function ProductGrid({ products, loading }: ProductGridProps) {
       );
     }
 
-    // Sort products
     result.sort((a, b) => {
       switch (sortBy) {
         case "price-low":
@@ -78,32 +88,31 @@ export function ProductGrid({ products, loading }: ProductGridProps) {
     setFilteredProducts(result);
   }, [products, searchQuery, selectedCategory, sortBy]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-  };
-
-  const handleSortChange = (value: string) => {
-    setSortBy(value);
-  };
-
-  const categories = [
-    { id: "all", name: "All" },
-    { id: "fruits", name: "Fruits" },
-    { id: "vegetables", name: "Vegetables" },
-    { id: "beverages", name: "Beverages" },
-  ];
-
   if (loading) {
-    return <div className="text-center py-12 text-muted-foreground">Loading products...</div>;
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        Loading products...
+      </div>
+    );
   }
 
-  if (!products || !Array.isArray(products) || products.length === 0) {
+  if (!products || products.length === 0) {
     return <div className="text-center py-12">No products available.</div>;
   }
+
+  const categories = [
+    { id: "all", name: "All", icon: null },
+    { id: "drinkware", name: "Drinkware", icon: Coffee },
+    { id: "food-storage", name: "Food Storage", icon: Package },
+    { id: "bags", name: "Bags", icon: ShoppingBag },
+    { id: "electronics", name: "Electronics", icon: Smartphone },
+    { id: "personal-care", name: "Personal Care", icon: Heart },
+    { id: "home", name: "Home", icon: Home },
+    { id: "clothing", name: "Clothing", icon: Shirt },
+    { id: "fitness", name: "Fitness", icon: Dumbbell },
+    { id: "kitchen", name: "Kitchen", icon: Utensils },
+    { id: "accessories", name: "Accessories", icon: Gem },
+  ];
 
   return (
     <div className="space-y-6">
@@ -113,24 +122,29 @@ export function ProductGrid({ products, loading }: ProductGridProps) {
           <Input
             placeholder="Search products..."
             value={searchQuery}
-            onChange={handleSearchChange}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <Search className="text-muted-foreground" />
         </div>
+
         <div className="flex items-center gap-2">
-          <Select onValueChange={handleCategoryChange} defaultValue="all">
-            <SelectTrigger className="w-[150px]">
+          <Select onValueChange={setSelectedCategory} defaultValue="all">
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
+                  <div className="flex items-center gap-2">
+                    {cat.icon && <cat.icon className="h-4 w-4" />}
+                    {cat.name}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select onValueChange={handleSortChange} defaultValue="name">
+
+          <Select onValueChange={setSortBy} defaultValue="name">
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Sort By" />
             </SelectTrigger>
@@ -141,11 +155,12 @@ export function ProductGrid({ products, loading }: ProductGridProps) {
               <SelectItem value="eco-score">Eco Score</SelectItem>
             </SelectContent>
           </Select>
+
           <SlidersHorizontal className="text-muted-foreground" />
         </div>
       </div>
 
-      {/* Product List */}
+      {/* Product list */}
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
@@ -169,7 +184,7 @@ export function ProductGrid({ products, loading }: ProductGridProps) {
                 setSelectedCategory("all");
                 setSortBy("name");
               }}
-            >   
+            >
               Clear Filters
             </Button>
           </div>

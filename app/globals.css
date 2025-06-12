@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -18,19 +25,19 @@
 
 @layer base {
   :root {
-    --background: 46 25% 98%; /* cream-50 */
-    --foreground: 0 0% 10%; /* charcoal */
+    --background: 46 25% 98%;
+    --foreground: 0 0% 10%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
-    --primary: 86 56% 14%; /* forest-500 */
+    --primary: 86 56% 14%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 120 13% 56%; /* sage-500 */
+    --secondary: 120 13% 56%;
     --secondary-foreground: 0 0% 10%;
     --muted: 120 25% 95%;
     --muted-foreground: 0 0% 45%;
-    --accent: 32 71% 67%; /* sandy-500 */
+    --accent: 32 71% 67%;
     --accent-foreground: 0 0% 10%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -71,12 +78,17 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
 
-@layer base {
+  /* Remove default spacing on html & body */
+  html,
+  body {
+    @apply m-0 p-0;
+  }
+
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground font-inter;
   }
@@ -100,27 +112,47 @@
   }
 
   .product-card {
-  @apply max-w-[280px] min-h-[400px] flex flex-col rounded-lg shadow-md border border-gray-200 overflow-hidden;
-}
+    @apply max-w-[280px] min-h-[400px] flex flex-col rounded-lg shadow-md border border-gray-200 overflow-hidden;
+  }
 
+  .product-card:hover {
+    @apply shadow-lg;
+  }
 
-.product-card:hover {
-  @apply shadow-lg;
-}
+  .product-image-container {
+    @apply w-full h-48 flex justify-center items-center bg-gray-100 overflow-hidden rounded-t-lg;
+  }
 
-.product-image-container {
-  @apply w-full h-48 flex justify-center items-center bg-gray-100 overflow-hidden rounded-t-lg;
-}
-
-.product-image {
-  @apply max-w-full max-h-full object-contain;
-}
-
+  .product-image {
+    @apply max-w-full max-h-full object-contain;
+  }
 
   .gradient-mesh {
     background: linear-gradient(135deg, #8FBC8F 0%, #F4A460 50%, #2D5016 100%);
     background-size: 400% 400%;
     animation: gradientShift 15s ease infinite;
+  }
+
+  .chat-messages-container {
+    max-height: 24rem;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding-right: 0.5rem;
+  }
+
+  .chat-messages-container::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .chat-messages-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-messages-container::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.4);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
 }
 
@@ -149,7 +181,7 @@
   animation: bounce-subtle 2s ease-in-out infinite;
 }
 
-/* Hide Next.js badge and error messages */
+/* Optional: Hide Next.js dev overlay */
 body > nextjs-portal {
   display: none;
 }

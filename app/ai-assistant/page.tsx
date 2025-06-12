@@ -1,8 +1,13 @@
 "use client";
 
 import Typewriter from "typewriter-effect";
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
+import { AIAssistant as AIAssistantComponent } from "@/components/ai-assistant";
+=======
+import { useState } from "react";
 import { AIAssistant } from "@/components/ai-assistant";
+>>>>>>> origin/Harsh-Sample-Branch
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,12 +20,12 @@ import {
   Heart,
 } from "lucide-react";
 
-export default function AIAssistantPage() {
-  const [selectedQuery, setSelectedQuery] = useState<string>("");
+interface AIAssistantProps {
+  prefillMessage?: string;
+}
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+export function AIAssistant({ prefillMessage }: AIAssistantProps) {
+  const [selectedQuery, setSelectedQuery] = useState<string>("");
 
   const sampleQueries = [
     {
@@ -96,8 +101,7 @@ export default function AIAssistantPage() {
               {
                 icon: Heart,
                 title: "Personalized Results",
-                description:
-                  "Recommendations match your lifestyle and values",
+                description: "Recommendations match your lifestyle and values",
               },
             ].map((feature, i) => (
               <Card
@@ -124,7 +128,7 @@ export default function AIAssistantPage() {
       {/* AI Assistant Interface */}
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4">
-          <AIAssistant prefillMessage={selectedQuery} />
+          <AIAssistantComponent />
         </div>
       </section>
 

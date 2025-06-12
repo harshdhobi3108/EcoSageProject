@@ -1,21 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import {
-  ShoppingCart,
-  Plus,
-  Minus,
-  Trash2,
-  CreditCard,
-  Truck,
-  Leaf,
-  Gift
-} from "lucide-react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Script from "next/script";
+import { toast } from "sonner";
+
 import {
   getCart,
   updateQuantity,
@@ -23,10 +13,25 @@ import {
   clearCart,
   CartItem
 } from "@/lib/cart";
-import { toast } from "sonner";
-import Script from "next/script";
+
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+
+import {
+  ShoppingCart,
+  Plus,
+  Minus,
+  Trash2,
+  CreditCard,
+  Truck,
+  Gift
+} from "lucide-react";
 
 export default function CartPage() {
+  const router = useRouter();
   const [cart, setCart] = useState(getCart());
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -42,10 +47,8 @@ export default function CartPage() {
   const discountAmount = subtotal * discount;
   const finalTotal = subtotal + shipping - discountAmount;
 
-  // Calculate total quantity (sum of all item quantities)
   const totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Formatter for Indian Rupee currency
   const rupeeFormatter = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -53,14 +56,14 @@ export default function CartPage() {
   });
 
   const updateCartState = useCallback(() => {
-    const updated = getCart();
-    setCart(updated);
+    setCart(getCart());
   }, []);
 
   useEffect(() => {
-    updateCartState();
-    window.addEventListener("cart-updated", updateCartState);
-    return () => window.removeEventListener("cart-updated", updateCartState);
+    const onCartUpdated = () => setCart(getCart());
+    setCart(getCart());
+    window.addEventListener("cart-updated", onCartUpdated);
+    return () => window.removeEventListener("cart-updated", onCartUpdated);
   }, [updateCartState]);
 
   const handleQuantityChange = (productId: string, quantity: number) => {
@@ -78,11 +81,12 @@ export default function CartPage() {
   };
 
   const handleApplyPromo = () => {
-    if (!promoCode.trim()) {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) {
       toast.error("Enter a promo code first");
       return;
     }
-    const code = promoCode.toUpperCase();
+
     if (validPromoCodes[code]) {
       setDiscount(validPromoCodes[code]);
       toast.success(`Promo code applied! ${validPromoCodes[code] * 100}% discount`);
@@ -93,7 +97,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (totalQuantity === 0) {
-      toast.error("Your cart is empty! Please add products before checkout.");
+      toast.error("Your cart is empty!");
       return;
     }
 
@@ -107,13 +111,12 @@ export default function CartPage() {
       description: "Purchase from EcoSage",
       image: "/logo.png",
       handler: function (response: any) {
-        alert("Payment successful! ID: " + response.razorpay_payment_id);
-
+        toast.success("Payment successful! ID: " + response.razorpay_payment_id);
         clearCart();
         setCart(getCart());
         window.dispatchEvent(new CustomEvent("cart-updated"));
-
-        toast.success("Thank you for your purchase! Your cart has been cleared.");
+        // Remove redirect to thank-you page, stay on cart page
+        // router.push("/thank-you");
       },
       prefill: {
         name: "Harsh",
@@ -134,36 +137,25 @@ export default function CartPage() {
 
   return (
     <>
-      <Script
-        src="https://checkout.razorpay.com/v1/checkout.js"
-        strategy="afterInteractive"
-      />
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
 
       {cart.items.length === 0 ? (
-        <div className="min-h-screen bg-background">
-          <div className="container mx-auto px-4 py-16">
-            <div className="text-center space-y-6 max-w-md mx-auto">
-              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto">
-                <ShoppingCart className="h-12 w-12 text-muted-foreground" />
-              </div>
-              <h1 className="text-3xl font-bold text-forest-600">Your Cart is Empty</h1>
-              <p className="text-muted-foreground">
-                Looks like you haven't added any sustainable products yet.
-              </p>
-              <div className="space-y-3">
-                <Button size="lg" className="w-full bg-forest-500 hover:bg-forest-600">
-                  Start Shopping
-                </Button>
-                <Button variant="outline" size="lg" className="w-full">
-                  Try AI Assistant
-                </Button>
-              </div>
+        <div className="min-h-screen flex flex-col items-center justify-center px-4">
+          <div className="text-center space-y-6 max-w-md">
+            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto">
+              <ShoppingCart className="h-10 w-10 text-muted-foreground" />
             </div>
+            <h1 className="text-2xl font-bold">Your Cart is Empty</h1>
+            <p className="text-muted-foreground">
+              Add eco-friendly products to your cart and start saving the planet!
+            </p>
+            <Button onClick={() => router.push("/shop")} className="w-full bg-forest-500 hover:bg-forest-600">
+              Continue Shopping
+            </Button>
           </div>
         </div>
       ) : (
         <div className="min-h-screen bg-background">
-          {/* Header */}
           <section className="bg-gradient-to-r from-forest-50 to-sage-50 py-8">
             <div className="container mx-auto px-4">
               <div className="flex items-center space-x-3">
@@ -178,49 +170,51 @@ export default function CartPage() {
             </div>
           </section>
 
-          {/* Main Content */}
           <div className="container mx-auto px-4 py-8 grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {cart.items.map((item: CartItem) => (
                 <Card key={item.productId}>
                   <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-20 h-20 object-cover rounded-lg"
-                      />
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-20 h-20">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{item.name}</h3>
-                        <p className="text-2xl font-bold text-forest-600 mt-1">
+                        <p className="text-forest-600 font-bold text-xl mt-1">
                           {rupeeFormatter.format(item.price)}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
                           size="icon"
                           onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
                           disabled={item.quantity <= 1}
                         >
-                          <Minus className="h-4 w-4" />
+                          <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="w-8 text-center">{item.quantity}</span>
+                        <span>{item.quantity}</span>
                         <Button
                           variant="outline"
                           size="icon"
                           onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
-                          className="ml-4 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600"
                           onClick={() => handleRemoveItem(item.productId, item.name)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
@@ -231,15 +225,15 @@ export default function CartPage() {
               {/* Promo Code */}
               <Card>
                 <CardContent className="p-6">
-                  <div className="flex items-center space-x-3">
-                    <Gift className="h-5 w-5 text-sandy-600" />
+                  <div className="flex items-center gap-2 mb-3">
+                    <Gift className="h-5 w-5 text-yellow-600" />
                     <span className="font-medium">Have a promo code?</span>
                   </div>
-                  <div className="flex space-x-2 mt-3">
+                  <div className="flex gap-2">
                     <Input
                       placeholder="ECO10, SAVE15, GREEN20"
                       value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                      onChange={(e) => setPromoCode(e.target.value)}
                       className="flex-1"
                     />
                     <Button variant="outline" onClick={handleApplyPromo}>
@@ -250,13 +244,13 @@ export default function CartPage() {
               </Card>
             </div>
 
-            {/* Summary */}
+            {/* Order Summary */}
             <div className="lg:col-span-1">
               <Card className="sticky top-24">
                 <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
+                  <CardTitle className="flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
-                    <span>Order Summary</span>
+                    Order Summary
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -266,14 +260,14 @@ export default function CartPage() {
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-green-600">
-                      <span>Discount ({(discount * 100).toFixed(0)}%)</span>
+                      <span>Discount ({discount * 100}%)</span>
                       <span>-{rupeeFormatter.format(discountAmount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="flex items-center space-x-1">
+                    <span className="flex items-center gap-1">
                       <Truck className="h-4 w-4" />
-                      <span>Shipping</span>
+                      Shipping
                     </span>
                     <span>{shipping === 0 ? "FREE" : rupeeFormatter.format(shipping)}</span>
                   </div>
@@ -282,11 +276,7 @@ export default function CartPage() {
                     <span>Total</span>
                     <span>{rupeeFormatter.format(finalTotal)}</span>
                   </div>
-                  <Button 
-                    className="w-full mt-4" 
-                    onClick={handleCheckout} 
-                    disabled={totalQuantity === 0}
-                  >
+                  <Button className="w-full mt-2" onClick={handleCheckout}>
                     Proceed to Payment
                   </Button>
                 </CardContent>

@@ -10,7 +10,7 @@ const nextConfig = {
   },
   images: {
     domains: ['images.unsplash.com'],
-    unoptimized: true, // 👈 Add this line
+    unoptimized: true,
   },
   devIndicators: false,
   allowedDevOrigins: [
@@ -19,6 +19,10 @@ const nextConfig = {
     "*.macaly-app.com",
     "*.macaly-user-data.dev",
   ],
+
+  env: {
+    GOOGLE_GENAI_API_KEY: process.env.GOOGLE_GENAI_API_KEY, // ✅ Required to access the key
+  },
 
   webpack(config) {
     config.resolve.alias['@'] = path.resolve(__dirname);
