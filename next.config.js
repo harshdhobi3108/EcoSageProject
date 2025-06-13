@@ -9,7 +9,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['images.unsplash.com'],
+    domains: ['images.unsplash.com', 'cdn.jsdelivr.net', 'unpkg.com'], // ✅ Added for leaflet icons
     unoptimized: true,
   },
   devIndicators: false,
@@ -21,7 +21,7 @@ const nextConfig = {
   ],
 
   env: {
-    GOOGLE_GENAI_API_KEY: process.env.GOOGLE_GENAI_API_KEY, // ✅ Required to access the key
+    GOOGLE_GENAI_API_KEY: process.env.GOOGLE_GENAI_API_KEY,
   },
 
   webpack(config) {

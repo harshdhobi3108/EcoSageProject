@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CartProvider } from "@/context/cartContext";
+import "leaflet/dist/leaflet.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -46,7 +47,7 @@ export default function RootLayout({
           >
             <div className="flex flex-col min-h-screen">
               {/* Optional Auth Header (can remove if unused) */}
-              <header className="flex justify-end items-center gap-4 border-b px-4 py-2 text-sm text-muted-foreground">
+              <header className="flex justify-end items-center gap-4 border-b px-4 text-sm text-muted-foreground">
                 {/* Add auth-related buttons/links here if needed */}
               </header>
 
