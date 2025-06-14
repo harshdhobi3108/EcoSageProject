@@ -45,7 +45,7 @@ export default function Home() {
 
     // Check for Eco Day
     const today = new Date().toISOString().slice(0, 10);
-    const ecoDates = ["2025-04-22", "2025-05-17", "2025-06-05"];
+    const ecoDates = ["2025-04-22", "2025-05-17", "2025-06-05" , "2025-06-14"]; // Example eco dates
     if (ecoDates.includes(today)) {
       setIsTodayEcoDay(true);
     }

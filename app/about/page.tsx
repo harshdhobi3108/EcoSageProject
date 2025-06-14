@@ -202,14 +202,14 @@ export default function AboutPage() {
               </p>
               <div className="flex items-center space-x-4">
                 <div className="flex -space-x-2">
-                  <div className="w-10 h-10 rounded-full bg-forest-500 flex items-center justify-center text-white text-sm font-medium">
-                    S
+                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                    H
                   </div>
                   <div className="w-10 h-10 rounded-full bg-sage-500 flex items-center justify-center text-white text-sm font-medium">
-                    A
+                    S
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-sandy-500 flex items-center justify-center text-white text-sm font-medium">
-                    M
+                  <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white text-sm font-medium">
+                    P
                   </div>
                 </div>
                 <div>
@@ -217,7 +217,7 @@ export default function AboutPage() {
                     Founded by environmental experts
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Sarah, Alex & Morgan
+                    Harsh,Shivaansh & Probin
                   </div>
                 </div>
               </div>
@@ -271,7 +271,7 @@ export default function AboutPage() {
       </section>
 
       {/* PREMIUM FOOTER */}
-      <footer className="bg-gradient-to-r from-forest-700 to-sage-700 text-white py-16">
+      <footer className="bg-gradient-to-br from-forest-700 to-teal-700 text-white py-16">
         <div className="container mx-auto px-6 md:px-12 lg:px-24">
           {/* Top Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
@@ -283,13 +283,13 @@ export default function AboutPage() {
               </p>
               <div className="flex gap-4">
                 <button
-                  className="bg-forest-500 hover:bg-forest-600 px-6 py-3 rounded-md font-semibold transition"
+                  className="bg-amber-500 hover:bg-white hover:text-forest-700 px-6 py-3 rounded-md font-semibold transition"
                   onClick={handleStartShopping}
                 >
                   Start Shopping
                 </button>
                 <button
-                  className="border border-white hover:bg-white hover:text-forest-700 px-6 py-3 rounded-md font-semibold transition"
+                  className="bg-purple-500 hover:bg-white hover:text-forest-700 px-6 py-3 rounded-md font-semibold transition"
                   onClick={handleTryAI}
                 >
                   Try AI Assistant
@@ -324,7 +324,7 @@ export default function AboutPage() {
                 />
                 <button
                   type="submit"
-                  className="bg-forest-500 hover:bg-forest-600 px-6 py-3 rounded-r-md font-semibold transition"
+                  className="bg-purple-500 hover:bg-amber-600 px-6 py-3 rounded-r-md font-semibold transition"
                 >
                   Subscribe
                 </button>
@@ -333,7 +333,7 @@ export default function AboutPage() {
           </div>
 
           {/* Bottom Section */}
-          <div className="flex flex-col md:flex-row items-center justify-between border-t border-gray-600 pt-8 text-gray-400 text-sm">
+          <div className="flex flex-col md:flex-row items-center justify-between border-t border-gray-600 pt-8 text-white text-l">
             <div>© {new Date().getFullYear()} EcoSage. All rights reserved.</div>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" aria-label="Facebook" className="hover:text-white"><Facebook size={20} /></a>
