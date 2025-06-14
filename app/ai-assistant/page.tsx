@@ -1,13 +1,8 @@
 "use client";
 
 import Typewriter from "typewriter-effect";
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-import { AIAssistant as AIAssistantComponent } from "@/components/ai-assistant";
-=======
 import { useState } from "react";
 import { AIAssistant } from "@/components/ai-assistant";
->>>>>>> origin/Harsh-Sample-Branch
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,11 +15,7 @@ import {
   Heart,
 } from "lucide-react";
 
-interface AIAssistantProps {
-  prefillMessage?: string;
-}
-
-export function AIAssistant({ prefillMessage }: AIAssistantProps) {
+export default function AIAssistantPage() {
   const [selectedQuery, setSelectedQuery] = useState<string>("");
 
   const sampleQueries = [
@@ -128,7 +119,7 @@ export function AIAssistant({ prefillMessage }: AIAssistantProps) {
       {/* AI Assistant Interface */}
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4">
-          <AIAssistantComponent />
+          <AIAssistant prefillMessage={selectedQuery} />
         </div>
       </section>
 

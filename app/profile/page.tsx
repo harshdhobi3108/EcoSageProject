@@ -40,6 +40,10 @@ export default function ProfilePage() {
       title: "♻️ International Recycling Day",
       date: "2025-05-17",
     },
+    {
+      title: "♻️ Sample Day",
+      date: "2025-06-14",
+    },
   ];
 
   // 📧 Step 2: Trigger email if today matches any eco event
