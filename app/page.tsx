@@ -13,6 +13,8 @@ import Link from "next/link";
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isTodayEcoDay, setIsTodayEcoDay] = useState(false);
+  const [showPopup, setShowPopup] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,10 +23,6 @@ export default function Home() {
       try {
         const res = await fetch("/api/products");
         const data = await res.json();
-
-        if (process.env.NODE_ENV === "development") {
-          console.log("Fetched products:", data);
-        }
 
         if (Array.isArray(data)) {
           const topProducts = data
@@ -44,10 +42,30 @@ export default function Home() {
     };
 
     fetchProducts();
+
+    // Check for Eco Day
+    const today = new Date().toISOString().slice(0, 10);
+    const ecoDates = ["2025-04-22", "2025-05-17", "2025-06-05"];
+    if (ecoDates.includes(today)) {
+      setIsTodayEcoDay(true);
+    }
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
+      {/* Eco Day Cute Popup at Bottom */}
+      {isTodayEcoDay && showPopup && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-50 border border-green-300 text-green-900 px-6 py-4 rounded-2xl shadow-lg z-50 animate-bounce-slow flex items-center gap-4">
+          <span className="text-lg">🌱 It's Eco Day! Make a difference today 💚</span>
+          <button
+            className="text-xl font-bold hover:text-red-400"
+            onClick={() => setShowPopup(false)}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-cream-50 via-sage-50 to-forest-50">
         <div className="absolute inset-0 bg-organic-pattern opacity-30" aria-hidden="true" />
@@ -63,20 +81,12 @@ export default function Home() {
 
                 <h1 className="text-4xl lg:text-6xl font-bold text-forest-600 leading-tight">
                   <div className="flex flex-wrap gap-2">
-                    <span>Shop</span>
-                    <Typewriter
-                      options={{
-                        strings: ["Sustainable with"],
-                        autoStart: true,
-                        loop: true,
-                        cursor: "",
-                      }}
-                    />
+                    <span>Shop Sustainable with</span>
                   </div>
                   <div className="gradient-mesh bg-clip-text text-transparent">
                     <Typewriter
                       options={{
-                        strings: ["AI Guidance"],
+                        strings: ["AI Guidance", "Smart Choices", "Green Thinking"],
                         autoStart: true,
                         loop: true,
                         cursor: "",
@@ -86,19 +96,20 @@ export default function Home() {
                 </h1>
 
                 <p className="text-lg text-muted-foreground max-w-md">
-                  Discover eco-friendly products tailored to your needs. Our AI assistant helps you find sustainable alternatives that match your lifestyle.
+                  Discover eco-friendly products tailored to your needs. Our AI assistant helps
+                  you find sustainable alternatives that match your lifestyle.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/ai-assistant">
-                  <Button size="lg" className="bg-forest-500 hover:bg-forest-600 text-white w-full sm:w-auto">
+                  <Button className="bg-forest-500 hover:bg-forest-600 text-white w-full sm:w-auto">
                     <Sparkles className="h-5 w-5 mr-2" />
                     Try AI Assistant
                   </Button>
                 </Link>
                 <Link href="/shop">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  <Button variant="outline" className="w-full sm:w-auto">
                     <ShoppingBag className="h-5 w-5 mr-2" />
                     Browse Products
                   </Button>
@@ -158,7 +169,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
+      {/* Featured Products */}
       <section className="py-16 bg-sage-50/30">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
@@ -171,7 +182,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Loading state */}
           {loading ? (
             <p className="text-center text-muted-foreground">Loading products...</p>
           ) : (
@@ -229,7 +239,9 @@ function FeatureCard({
 }) {
   return (
     <div className="text-center space-y-4">
-      <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center ${bgClass}`}>{icon}</div>
+      <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center ${bgClass}`}>
+        {icon}
+      </div>
       <h3 className="text-xl font-semibold">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
     </div>
