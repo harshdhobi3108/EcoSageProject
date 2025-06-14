@@ -9,8 +9,13 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import dynamic from "next/dynamic";
+import { CalendarDays } from "lucide-react";
 
+// Dynamically loaded components
 const DynamicMapWrapper = dynamic(() => import("@/components/MapWrapper"), {
+  ssr: false,
+});
+const GreenCalendar = dynamic(() => import("@/components/EcoCalendar"), {
   ssr: false,
 });
 
@@ -19,7 +24,61 @@ export default function ProfilePage() {
   const [location, setLocation] = useState("");
   const [coords, setCoords] = useState<[number, number] | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
+  // 🎉 Step 1: Define eco events
+  const ecoEvents = [
+    {
+      title: "🌱 World Environment Day",
+      date: "2025-06-05",
+    },
+    {
+      title: "🌍 Earth Day",
+      date: "2025-04-22",
+    },
+    {
+      title: "♻️ International Recycling Day",
+      date: "2025-05-17",
+    },
+  ];
+
+  // 📧 Step 2: Trigger email if today matches any eco event
+  useEffect(() => {
+  const today = new Date().toISOString().split("T")[0];
+  const matchedDay = ecoEvents.find((e) => e.date === today);
+
+  const sendEmail = async () => {
+    try {
+      const alreadySent = localStorage.getItem("ecoEmailSent");
+      if (alreadySent === today) return;
+
+      const res = await fetch("/api/send-eco-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user?.primaryEmailAddress?.emailAddress,
+          ecoDay: matchedDay,
+        }),
+      });
+
+      const result = await res.json();
+      console.log("📧 Email sent status:", result);
+
+      if (result.success) {
+        localStorage.setItem("ecoEmailSent", today); // 🟢 Prevent resending
+      }
+    } catch (error) {
+      console.error("❌ Email send failed:", error);
+    }
+  };
+
+  if (user && matchedDay) {
+    sendEmail();
+  }
+}, [user]);
+
+
+  // 📍 Step 3: Detect user location & save metadata
   useEffect(() => {
     if (typeof window !== "undefined" && user && isLoaded) {
       const savedLocation = user.publicMetadata?.location;
@@ -114,7 +173,23 @@ export default function ProfilePage() {
               position: "relative",
             }}
           >
-            {/* Profile Info */}
+            {/* 📅 Top-right Calendar Icon */}
+            <button
+              onClick={() => setShowCalendar(true)}
+              style={{
+                position: "absolute",
+                top: "1.2rem",
+                right: "1.2rem",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+              aria-label="Open Eco Calendar"
+            >
+              <CalendarDays size={24} color="#5a189a" />
+            </button>
+
+            {/* 👤 Profile Info */}
             <div style={{ display: "flex", gap: "2rem" }}>
               <UserButton
                 afterSignOutUrl="/"
@@ -130,13 +205,25 @@ export default function ProfilePage() {
                 }}
               />
               <div style={{ flex: 1, marginTop: "0.8rem" }}>
-                <h1 style={{ fontSize: "2.2rem", fontWeight: "700", color: "#240046" }}>
+                <h1
+                  style={{
+                    fontSize: "2.2rem",
+                    fontWeight: "700",
+                    color: "#240046",
+                  }}
+                >
                   {user.fullName || "EcoSage User"}
                 </h1>
                 <p style={{ fontSize: "1rem", color: "#555" }}>
                   📧 {user.emailAddresses[0]?.emailAddress}
                 </p>
-                <p style={{ fontSize: "1rem", color: "#777", marginTop: "0.5rem" }}>
+                <p
+                  style={{
+                    fontSize: "1rem",
+                    color: "#777",
+                    marginTop: "0.5rem",
+                  }}
+                >
                   🗓️ Joined:{" "}
                   <strong>
                     {new Date(user.createdAt).toLocaleDateString("en-IN", {
@@ -146,13 +233,25 @@ export default function ProfilePage() {
                     })}
                   </strong>
                 </p>
-                <p style={{ fontSize: "1rem", color: "#555", marginTop: "0.5rem" }}>
+                <p
+                  style={{
+                    fontSize: "1rem",
+                    color: "#555",
+                    marginTop: "0.5rem",
+                  }}
+                >
                   📍 Location:{" "}
                   <strong>
                     {loadingLocation ? "Detecting..." : location || "Unknown"}
                   </strong>
                 </p>
-                <p style={{ color: "#777", fontSize: "0.9rem", marginTop: "0.5rem" }}>
+                <p
+                  style={{
+                    color: "#777",
+                    fontSize: "0.9rem",
+                    marginTop: "0.5rem",
+                  }}
+                >
                   🧭 Coordinates:{" "}
                   {coords
                     ? `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`
@@ -161,14 +260,9 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Map Section with zIndex Fix */}
+            {/* 🗺️ Map Section */}
             {coords && !loadingLocation && (
-              <div
-                style={{
-                  position: "relative",
-                  zIndex: 10,
-                }}
-              >
+              <div style={{ position: "relative", zIndex: 10 }}>
                 <h3
                   style={{
                     fontSize: "1rem",
@@ -178,8 +272,15 @@ export default function ProfilePage() {
                 >
                   📌 Map:
                 </h3>
-                <DynamicMapWrapper position={{ lat: coords[0], lng: coords[1] }} />
+                <DynamicMapWrapper
+                  position={{ lat: coords[0], lng: coords[1] }}
+                />
               </div>
+            )}
+
+            {/* 📅 Eco Calendar Modal */}
+            {showCalendar && (
+              <GreenCalendar onClose={() => setShowCalendar(false)} />
             )}
           </div>
         )}
