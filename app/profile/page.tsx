@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   SignedIn,
   SignedOut,
@@ -11,7 +11,6 @@ import {
 import dynamic from "next/dynamic";
 import { CalendarDays } from "lucide-react";
 
-// Dynamically loaded components
 const DynamicMapWrapper = dynamic(() => import("@/components/MapWrapper"), {
   ssr: false,
 });
@@ -25,60 +24,106 @@ export default function ProfilePage() {
   const [coords, setCoords] = useState<[number, number] | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
 
-  // 🎉 Step 1: Define eco events
-  const ecoEvents = [
-    {
-      title: "🌱 World Environment Day",
-      date: "2025-06-05",
-    },
-    {
-      title: "🌍 Earth Day",
-      date: "2025-04-22",
-    },
-    {
-      title: "♻️ International Recycling Day",
-      date: "2025-05-17",
-    },
-  ];
+  const ecoEvents = useMemo(
+    () => [
+      {
+        title: "🌱 World Environment Day",
+        start: new Date("2025-06-05"),
+        end: new Date("2025-06-05"),
+      },
+      {
+        title: "🌍 Earth Day",
+        start: new Date("2025-04-22"),
+        end: new Date("2025-04-22"),
+      },
+      {
+        title: "♻️ International Recycling Day",
+        start: new Date("2025-05-17"),
+        end: new Date("2025-05-17"),
+      },
+    ],
+    []
+  );
 
-  // 📧 Step 2: Trigger email if today matches any eco event
   useEffect(() => {
-  const today = new Date().toISOString().split("T")[0];
-  const matchedDay = ecoEvents.find((e) => e.date === today);
+    const fetchProductEvents = async () => {
+      try {
+        const res = await fetch("/api/user-products");
+        const data = await res.json();
 
-  const sendEmail = async () => {
-    try {
-      const alreadySent = localStorage.getItem("ecoEmailSent");
-      if (alreadySent === today) return;
+        if (!Array.isArray(data)) throw new Error("Invalid response");
 
-      const res = await fetch("/api/send-eco-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user?.primaryEmailAddress?.emailAddress,
-          ecoDay: matchedDay,
-        }),
-      });
+        const parsed = data.flatMap((item: any) => {
+          const name = item?.product?.name;
+          const purchaseDate = item?.purchaseDate;
+          const expiryDate = item?.expiryDate;
 
-      const result = await res.json();
-      console.log("📧 Email sent status:", result);
+          if (!name || !purchaseDate || !expiryDate) return [];
 
-      if (result.success) {
-        localStorage.setItem("ecoEmailSent", today); // 🟢 Prevent resending
+          return [
+            {
+              title: `🛍️ Bought: ${name}`,
+              start: new Date(purchaseDate),
+              end: new Date(purchaseDate),
+            },
+            {
+              title: `⏳ Expiry: ${name}`,
+              start: new Date(expiryDate),
+              end: new Date(expiryDate),
+            },
+          ];
+        });
+
+        setCalendarEvents([...ecoEvents, ...parsed]);
+      } catch (err) {
+        console.error("❌ Failed to fetch product events:", err);
+        setCalendarEvents(ecoEvents); // fallback
       }
-    } catch (error) {
-      console.error("❌ Email send failed:", error);
-    }
-  };
+    };
 
-  if (user && matchedDay) {
-    sendEmail();
-  }
-}, [user]);
+    if (user) fetchProductEvents();
+  }, [user, ecoEvents]);
 
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const matchedDay = ecoEvents.find(
+      (e) => e.start.toISOString().split("T")[0] === today
+    );
 
-  // 📍 Step 3: Detect user location & save metadata
+    const sendEmail = async () => {
+      try {
+        const alreadySent = localStorage.getItem("ecoEmailSent");
+        if (alreadySent === today) return;
+
+        const res = await fetch("/api/send-eco-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: user?.primaryEmailAddress?.emailAddress,
+            ecoDay: {
+              ...matchedDay,
+              date: matchedDay?.start.toISOString().split("T")[0],
+            },
+          }),
+        });
+
+        const result = await res.json();
+        if (result.success) {
+          localStorage.setItem("ecoEmailSent", today);
+          alert(`📬 Eco Email Sent: ${matchedDay?.title}`);
+        } else {
+          console.error("❌ Email failed:", result.error);
+        }
+      } catch (error) {
+        console.error("❌ Email send error:", error);
+      }
+    };
+
+    if (user && matchedDay) sendEmail();
+  }, [user, ecoEvents]);
+
   useEffect(() => {
     if (typeof window !== "undefined" && user && isLoaded) {
       const savedLocation = user.publicMetadata?.location;
@@ -129,7 +174,6 @@ export default function ProfilePage() {
         );
       } else {
         setLocation(savedLocation as string);
-
         if (user.publicMetadata.coords) {
           setCoords(user.publicMetadata.coords as [number, number]);
         }
@@ -149,8 +193,7 @@ export default function ProfilePage() {
         backgroundColor: "#fff",
         padding: "2rem",
         display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
+        justifyContent: "center",
       }}
     >
       <SignedOut>
@@ -171,9 +214,9 @@ export default function ProfilePage() {
               boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
               zIndex: 0,
               position: "relative",
+              boxSizing: "border-box",
             }}
           >
-            {/* 📅 Top-right Calendar Icon */}
             <button
               onClick={() => setShowCalendar(true)}
               style={{
@@ -189,8 +232,7 @@ export default function ProfilePage() {
               <CalendarDays size={24} color="#5a189a" />
             </button>
 
-            {/* 👤 Profile Info */}
-            <div style={{ display: "flex", gap: "2rem" }}>
+            <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }}>
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
@@ -204,7 +246,7 @@ export default function ProfilePage() {
                   },
                 }}
               />
-              <div style={{ flex: 1, marginTop: "0.8rem" }}>
+              <div style={{ flex: 1, marginTop: "0.8rem", minWidth: "250px" }}>
                 <h1
                   style={{
                     fontSize: "2.2rem",
@@ -217,13 +259,7 @@ export default function ProfilePage() {
                 <p style={{ fontSize: "1rem", color: "#555" }}>
                   📧 {user.emailAddresses[0]?.emailAddress}
                 </p>
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    color: "#777",
-                    marginTop: "0.5rem",
-                  }}
-                >
+                <p style={{ fontSize: "1rem", color: "#777", marginTop: "0.5rem" }}>
                   🗓️ Joined:{" "}
                   <strong>
                     {new Date(user.createdAt).toLocaleDateString("en-IN", {
@@ -233,25 +269,13 @@ export default function ProfilePage() {
                     })}
                   </strong>
                 </p>
-                <p
-                  style={{
-                    fontSize: "1rem",
-                    color: "#555",
-                    marginTop: "0.5rem",
-                  }}
-                >
+                <p style={{ fontSize: "1rem", color: "#555", marginTop: "0.5rem" }}>
                   📍 Location:{" "}
                   <strong>
                     {loadingLocation ? "Detecting..." : location || "Unknown"}
                   </strong>
                 </p>
-                <p
-                  style={{
-                    color: "#777",
-                    fontSize: "0.9rem",
-                    marginTop: "0.5rem",
-                  }}
-                >
+                <p style={{ color: "#777", fontSize: "0.9rem", marginTop: "0.5rem" }}>
                   🧭 Coordinates:{" "}
                   {coords
                     ? `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`
@@ -260,27 +284,17 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* 🗺️ Map Section */}
             {coords && !loadingLocation && (
-              <div style={{ position: "relative", zIndex: 10 }}>
-                <h3
-                  style={{
-                    fontSize: "1rem",
-                    fontWeight: 600,
-                    marginBottom: "0.5rem",
-                  }}
-                >
+              <div style={{ position: "relative", zIndex: 10, width: "100%", overflow: "hidden" }}>
+                <h3 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "0.5rem" }}>
                   📌 Map:
                 </h3>
-                <DynamicMapWrapper
-                  position={{ lat: coords[0], lng: coords[1] }}
-                />
+                <DynamicMapWrapper position={{ lat: coords[0], lng: coords[1] }} />
               </div>
             )}
 
-            {/* 📅 Eco Calendar Modal */}
             {showCalendar && (
-              <GreenCalendar onClose={() => setShowCalendar(false)} />
+              <GreenCalendar onClose={() => setShowCalendar(false)} events={calendarEvents} />
             )}
           </div>
         )}
