@@ -46,7 +46,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     const matchedDay = ecoEvents.find(
-      (e) => e.start.toISOString().split("T")[0] === today
+      (e) => e.date === today
     );
 
     const sendEmail = async () => {
@@ -61,7 +61,7 @@ export default function ProfilePage() {
             email: user?.primaryEmailAddress?.emailAddress,
             ecoDay: {
               ...matchedDay,
-              date: matchedDay?.start.toISOString().split("T")[0],
+              date: matchedDay?.date,
             },
           }),
         });
@@ -219,11 +219,13 @@ export default function ProfilePage() {
                 <p style={{ fontSize: "1rem", color: "#777", marginTop: "0.5rem" }}>
                   🗓️ Joined:{" "}
                   <strong>
-                    {new Date(user.createdAt).toLocaleDateString("en-IN", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
+                    {user.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString("en-IN", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "Unknown"}
                   </strong>
                 </p>
                 <p style={{ fontSize: "1rem", color: "#555", marginTop: "0.5rem" }}>
