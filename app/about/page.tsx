@@ -344,6 +344,6 @@ export default function AboutPage() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>
+  );
 }
