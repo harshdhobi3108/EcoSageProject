@@ -1,30 +1,45 @@
-# EcoSageProject 🌱
+# 🌿 EcoSage
 
-A Next.js-based web application focused on sustainability and eco-friendly living.
+**EcoSage** is a smart sustainability platform that empowers users to track their eco-friendly habits, purchases, and receive personalized environmental reminders. With real-time maps, AI assistance, and sleek UI, EcoSage blends technology with eco-consciousness for a better future.
 
-## 🚀 Getting Started
+🔗 **Live Demo**: [eco-sage.vercel.app](https://eco-sage.vercel.app/)
 
-Follow the steps below to set up and run the project locally.
+---
 
-### 🛠️ Prerequisites
+## ✨ Features
 
-Make sure you have the following installed:
+- 🔐 **User Authentication with Clerk**
+- 📅 **Eco Calendar** to track purchases and expiry dates
+- 📍 **Smart Location Integration** using Geoapify
+- 🤖 **AI Assistant** for user interaction and eco-help
+- 👤 **Authorized User Profile Page**
+- 🗺️ **Interactive Map** powered by OpenStreetMap
+- 📬 **EcoDay Email Reminder System**
+- 💡 **Responsive UI Design** with Tailwind CSS
 
-- 💻 [Node.js](https://nodejs.org/) (v18.x or above recommended)
-- 📦 [npm](https://www.npmjs.com/) (comes with Node.js)
+---
 
+## 🛠️ Tech Stack
 
-Clone the repository📥  
-git clone https://github.com/Probin-15/EcoSageProject.git
+| Technology       | Description                              |
+|------------------|------------------------------------------|
+| **Next.js**      | React-based framework (frontend/backend) |
+| **Tailwind CSS** | Utility-first styling                    |
+| **Clerk**        | User authentication and session mgmt     |
+| **Nodemailer**   | Email service                            |
+| **Geoapify API** | Location and coordinate services         |
+| **OpenStreetMap**| Map rendering                            |
+| **Vercel**       | Deployment platform                      |
 
-Navigate to the project directory📂  
+---
+
+## 📦 Getting Started
+
+Follow the steps below to set up the project locally:
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/harshdhobi3108/EcoSageProject.git
 cd EcoSageProject
-
-Install dependencies⚙️  
-command1=npm install
-
-Build the project🏗️  
-command2=npm run build
-
-Start the production server🚀  
-command3=npm run start 
+npm install
